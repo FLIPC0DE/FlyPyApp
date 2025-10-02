@@ -1,0 +1,19 @@
+{
+  "name": "fly_app_backend",
+  "version": "1.0.0",
+  "description": "Proyecto FlyApp el cual es una plaaforma de curcos de Python para una institucion academica, este se enfoca en la logica del negocio de la misma",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "TOMOKI977",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.16.3"
+  }
+}
