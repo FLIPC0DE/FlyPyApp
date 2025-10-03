@@ -1,4 +1,3 @@
-import React from "react";
 import PaginaDeRegistro from "./pages/PaginaDeRegistro";
 
 function App() {
