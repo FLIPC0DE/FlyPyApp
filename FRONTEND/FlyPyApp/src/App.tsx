@@ -5,10 +5,10 @@ function App() {
 }
 
 export default App;*/
-import FormularioCrearCurso from "./components/FormularioCrearCurso";
+import PaginaDeRegistro from "./pages/PaginaDeRegistro";
 
 function App() {
-  return <FormularioCrearCurso />;
+  return <PaginaDeRegistro />;
 }
 
 export default App;
