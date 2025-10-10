@@ -2,14 +2,37 @@ import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
 const CreateCourse = () => {
-  const [title, setTitle] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [tituloCurso, settitulo_curso] = useState("");
+  const [fechaInicio, setfechaInicio] = useState("");
+  const [fechaFin, setfechaFin] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ title, startDate, endDate });
+    let idUsuario = 1
+    console.log({ idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso });
+    
+  
+    try {
+      
+      const response = await fetch("http://localhost:4000/api/cursos/registrarCurso", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        alert("Curso registrado con éxito ✅");
+        console.log("Usuario:", data);
+      } else {
+        alert(data.error || "Error al registrar curso");
+      }
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      alert("No se pudo conectar con el servidor");
+    }
   };
 
   return (
@@ -20,19 +43,19 @@ const CreateCourse = () => {
 
           {/* Grid para los campos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Course Title */}
+            {/* Course titulo_curso */}
             <div>
-              <label htmlFor="title" className="block mb-2 text-gray-300">
+              <label htmlFor="tituloCurso" className="block mb-2 text-gray-300">
                 Titulo del Curso
               </label>
               <input
-                id="title"
+                id="tituloCurso"
                 type="text"
-                placeholder="Enter course title"
+                placeholder="Enter course titulo_curso"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
-                value={title}
+                value={tituloCurso}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setTitle(e.target.value)
+                  settitulo_curso(e.target.value)
                 }
               />
             </div>
@@ -52,32 +75,32 @@ const CreateCourse = () => {
           </div>
             {/* Start Date */}
             <div>
-              <label htmlFor="startDate" className="block mb-2 text-gray-300">
+              <label htmlFor="fechaInicio" className="block mb-2 text-gray-300">
                 Fecha de Inicio
               </label>
               <input
-                id="startDate"
+                id="fechaInicio"
                 type="date"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
-                value={startDate}
+                value={fechaInicio}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setStartDate(e.target.value)
+                  setfechaInicio(e.target.value)
                 }
               />
             </div>
 
             {/* End Date */}
             <div>
-              <label htmlFor="endDate" className="block mb-2 text-gray-300">
+              <label htmlFor="fechaFin" className="block mb-2 text-gray-300">
                 Fecha de Fin
               </label>
               <input
-                id="endDate"
+                id="fechaFin"
                 type="date"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
-                value={endDate}
+                value={fechaFin}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setEndDate(e.target.value)
+                  setfechaFin(e.target.value)
                 }
               />
             </div>
