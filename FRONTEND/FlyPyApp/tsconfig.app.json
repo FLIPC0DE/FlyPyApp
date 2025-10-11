@@ -9,7 +9,7 @@
   "skipLibCheck": true,
   "incremental": true,
   "forceConsistentCasingInFileNames": true,
-
+  "allowSyntheticDefaultImports": true,
   /* Bundler mode */
   "moduleResolution": "node",
   "allowImportingTsExtensions": true,

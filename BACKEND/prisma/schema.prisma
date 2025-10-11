@@ -20,11 +20,22 @@ model Usuario {
   password String
   id_rol    Int
   rol      Rol    @relation(fields: [id_rol], references: [id_rol])
+  cursos  Curso[]
 }
 
 model Rol {
   id_rol          Int       @id @default(autoincrement())
   nombre_rol  String    @unique
   usuarios    Usuario[]
+}
+
+model Curso {
+  id_curso    Int       @id @default(autoincrement())
+  id_usuario  Int
+  titulo_curso  String 
+  descripcion String   @db.VarChar(255)   
+  fecha_inicio DateTime  @db.Date
+  fecha_fin   DateTime   @db.Date
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
 
