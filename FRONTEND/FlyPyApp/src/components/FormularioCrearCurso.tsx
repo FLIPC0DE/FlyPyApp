@@ -54,6 +54,7 @@ const CreateCourse = () => {
                 placeholder="Enter course titulo_curso"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
                 value={tituloCurso}
+                required
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   settitulo_curso(e.target.value)
                 }
@@ -70,6 +71,7 @@ const CreateCourse = () => {
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
               placeholder="Escribe una breve descripción del curso..."
+              required
               className="w-full p-3 h-32 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
               />
           </div>
@@ -83,6 +85,7 @@ const CreateCourse = () => {
                 type="date"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
                 value={fechaInicio}
+                required
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setfechaInicio(e.target.value)
                 }
@@ -99,6 +102,7 @@ const CreateCourse = () => {
                 type="date"
                 className="w-full p-3 rounded-md bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-green-400 focus:outline-none"
                 value={fechaFin}
+                required
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setfechaFin(e.target.value)
                 }
