@@ -9,9 +9,9 @@ export const iniciarSesion = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await prisma.usuario.findUnique({ where: { email } });
-    //console.log(user.email,user.password);
+    // console.log(user.email,user.password);
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
-    //console.log(user.email);
+    // console.log(user.email);
     
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword)

@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const registrarCurso = async (req, res) => {
+  const { idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso  } = req.body;
+  console.log(idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso  );
   try {
     const { idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso  } = req.body;
     console.log(idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso  );
