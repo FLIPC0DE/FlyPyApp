@@ -28,12 +28,16 @@ const BarraDeNavegacionLateral = () => {
         >
           Registrar Usuario
         </NavLink>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-[#1e293b] transition">
-            🔍 Otra Opcion 1
-          </button>
-          <button className="w-full text-left py-2 px-3 rounded hover:bg-[#1e293b] transition">
-            ⚙️ Otra Opcion 2
-          </button>
+        <NavLink
+          to="/iniciarSesion"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded hover:bg-indigo-600 hover:text-white ${
+              isActive ? "bg-indigo-700 text-white" : ""
+            }`
+          }
+        >
+          Iniciar Sesion
+        </NavLink>
         </nav>
       </aside>
     );
