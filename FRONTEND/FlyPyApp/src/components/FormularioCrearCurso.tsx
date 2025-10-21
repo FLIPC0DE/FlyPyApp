@@ -11,9 +11,33 @@ const CreateCourse = () => {
     e.preventDefault();
     let idUsuario = 3
     console.log({ idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso });
-    
+      
+    const stringToDate = (str: string) => {
+      const [year, month, day] = str.split("-").map(Number);
+      return new Date(year, month - 1, day); // empieza en 0
+    };
   
     try {
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0);
+  
+      const inicio = stringToDate(fechaInicio);
+      const fin = stringToDate(fechaFin);
+  
+      if (inicio < hoy) {
+        alert("La fecha de inicio no puede ser anterior a hoy.");
+        return;
+      }
+  
+      if (fin < hoy) {
+        alert("La fecha fin no puede ser anterior a hoy.");
+        return;
+      }
+  
+      if (fin <= inicio) {
+        alert("La fecha fin debe ser mayor a la fecha de inicio.");
+        return;
+      }
       
       const response = await fetch("http://localhost:4000/api/cursos/registrarCurso", {
         method: "POST",
