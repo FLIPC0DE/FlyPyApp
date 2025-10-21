@@ -9,7 +9,7 @@ const CreateCourse = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let idUsuario = 1
+    let idUsuario = 3
     console.log({ idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso });
     
   
