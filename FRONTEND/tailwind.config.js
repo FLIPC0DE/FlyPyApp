@@ -1,60 +1,99 @@
+import { heroui } from "@heroui/theme";
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-    darkMode: ["class"],
-    content: [
+export default {
+  content: [
     "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}"
+    './src/layouts/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-  	extend: {
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		}
-  	}
+    extend: {
+      fontFamily: {
+        sans: ['Space Grotesk', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
+      },
+    },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  darkMode: "class",
+  plugins: [
+    heroui({
+      themes: {
+        light: {
+          colors: {
+            background: "#F7FAFC",
+            foreground: "#0F1724",
+            divider: "#E2E8F0",
+            focus: "#0B8F6B",
+            content1: "#FFFFFF",
+            content2: "#F1F5F9",
+            content3: "#E2E8F0",
+            content4: "#CBD5E1",
+            default: {
+              DEFAULT: "#E2E8F0",
+              foreground: "#0F1724",
+            },
+            primary: {
+              DEFAULT: "#0B8F6B",
+              foreground: "#FFFFFF",
+            },
+            secondary: {
+              DEFAULT: "#EDF7F4",
+              foreground: "#054036",
+            },
+            success: {
+              DEFAULT: "#16A34A",
+              foreground: "#FFFFFF",
+            },
+            warning: {
+              DEFAULT: "#FBBF24",
+              foreground: "#231A00",
+            },
+            danger: {
+              DEFAULT: "#DC2626",
+              foreground: "#FFFFFF",
+            },
+          },
+        },
+        dark: {
+          colors: {
+            background: "#0F1724",
+            foreground: "#E6EEF3",
+            divider: "#2B3440",
+            focus: "#21A179",
+            content1: "#0E1B26",
+            content2: "#152032",
+            content3: "#2B3440",
+            content4: "#374151",
+            default: {
+              DEFAULT: "#2B3440",
+              foreground: "#E6EEF3",
+            },
+            primary: {
+              DEFAULT: "#21A179",
+              foreground: "#FFFFFF",
+            },
+            secondary: {
+              DEFAULT: "#152032",
+              foreground: "#BFE9DF",
+            },
+            success: {
+              DEFAULT: "#16A34A",
+              foreground: "#05230B",
+            },
+            warning: {
+              DEFAULT: "#F59E0B",
+              foreground: "#251500",
+            },
+            danger: {
+              DEFAULT: "#E02424",
+              foreground: "#FFFFFF",
+            },
+          },
+        },
+      },
+    }),
+  ],
+};

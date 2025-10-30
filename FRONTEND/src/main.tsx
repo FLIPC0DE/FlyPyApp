@@ -1,19 +1,23 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
-import "./index.css";
-import { AuthProvider } from "./context/AutenticacionContexto";
 
-const rootElement = document.getElementById("root")!;
-const root = createRoot(rootElement);
+import App from "./App.tsx";
+import { Provider } from "./provider.tsx";
+import "@/styles/globals.css";
+import { AuthProvider } from "./context/AutenticacionContexto.tsx";
+import { RedireccionProvider } from "./context/redireccion.contexto.tsx";
 
-root.render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <AuthProvider>
-        <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
-    </AuthProvider>
-  </React.StrictMode>
+    <BrowserRouter>
+      <Provider>
+        <RedireccionProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </RedireccionProvider>
+      </Provider>
+    </BrowserRouter>
+  </React.StrictMode>,
 );
