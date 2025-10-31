@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Curso" ALTER COLUMN "fecha_inicio" SET DATA TYPE DATE,
-ALTER COLUMN "fecha_fin" SET DATA TYPE DATE;

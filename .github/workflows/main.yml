@@ -1,4 +1,4 @@
-name: PyFly CI - Basic
+name: PyFly CI/CD
 
 on:
   push:
@@ -10,86 +10,50 @@ env:
   NODE_VERSION: '18.x'
 
 jobs:
-  # Job 1: Verificación básica
-  hello-world:
-    name: Hello World - PyFly
+  setup:
+    name: 🔧 Setup Proyecto
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Saludar
+      - name: Mostrar contexto
         run: |
-          echo "🚀 ¡Bienvenido a PyFly!"
+          echo "🚀 CI/CD para PyFly"
           echo "📅 Fecha: $(date)"
           echo "🌿 Branch: ${{ github.ref_name }}"
           echo "👤 Usuario: ${{ github.actor }}"
           echo "💬 Commit: ${{ github.event.head_commit.message }}"
 
-      - name: Mostrar info del proyecto
-        run: |
-          echo "================================"
-          echo "   PROYECTO PYFLY - CI/CD"
-          echo "================================"
-          echo "Stack: React + Node.js + PostgreSQL"
-          echo "Sprints: 6 sprints de 2 semanas"
-          echo "Equipo: 4 desarrolladores"
-          echo "================================"
-
-  # Job 2: Verificar estructura del proyecto
-  check-structure:
-    name: Verificar Estructura
+  estructura:
+    name: 📂 Verificar estructura
     runs-on: ubuntu-latest
-    needs: hello-world
-    
+    needs: setup
+
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Listar archivos del proyecto
-        run: |
-          echo "📂 Estructura del proyecto:"
-          ls -la
-          
+      - name: Listar archivos
+        run: ls -la
+
       - name: Verificar carpetas principales
         run: |
-          echo "Verificando carpetas esperadas..."
-          if [ -d "BACKEND" ]; then
-            echo "✅ Carpeta BACKEND encontrada"
-          else
-            echo "⚠️  Carpeta BACKEND no encontrada (será creada más adelante)"
-          fi
-          
-          if [ -d "FRONTEND" ]; then
-            echo "✅ Carpeta FRONTEND encontrada"
-          else
-            echo "⚠️  Carpeta FRONTEND no encontrada (será creada más adelante)"
-          fi
+          echo "🔍 Verificando carpetas..."
+          [ -d "BACKEND" ] && echo "✅ BACKEND presente" || echo "⚠️ BACKEND faltante"
+          [ -d "FRONTEND" ] && echo "✅ FRONTEND presente" || echo "⚠️ FRONTEND faltante"
 
-  # Job 3: Lint Backend (si existe)
-  lint-backend:
-    name: Lint Backend
+  backend:
+    name: 🧪 Test Backend
     runs-on: ubuntu-latest
-    needs: check-structure
-    
+    needs: estructura
+
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Verificar si existe Backend
-        id: check-backend
-        run: |
-          if [ -f "BACKEND/package.json" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Backend encontrado"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Backend no encontrado, saltando lint"
-          fi
-
       - name: Setup Node.js
-        if: steps.check-backend.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -97,73 +61,63 @@ jobs:
           cache-dependency-path: BACKEND/package-lock.json
 
       - name: Instalar dependencias
-        if: steps.check-backend.outputs.exists == 'true'
         working-directory: ./BACKEND
         run: npm ci
 
-      - name: Ejecutar ESLint
-        if: steps.check-backend.outputs.exists == 'true'
+      - name: Ejecutar lint
         working-directory: ./BACKEND
-        run: npm run lint || echo "⚠️ Lint no configurado aún"
+        run: npm run lint || echo "⚠️ Lint no configurado"
 
-  # Job 4: Lint Frontend (si existe)
-  lint-frontend:
-    name: Lint Frontend
+      - name: Ejecutar tests con cobertura
+        working-directory: ./BACKEND
+        run: npm run test:coverage
+
+      - name: Guardar reporte de cobertura
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: BACKEND/coverage
+
+  frontend:
+    name: 🎨 Lint Frontend
     runs-on: ubuntu-latest
-    needs: check-structure
-    
+    needs: estructura
+
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Verificar si existe Frontend
-        id: check-frontend
-        run: |
-          if [ -f "FRONTEND/FlyPyApp/package.json" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Frontend encontrado"
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Frontend no encontrado, saltando lint"
-          fi
-
       - name: Setup Node.js
-        if: steps.check-frontend.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: FRONTEND/FlyPyApp/package-lock.json
+          cache-dependency-path: FRONTEND/package-lock.json
 
       - name: Instalar dependencias
-        if: steps.check-frontend.outputs.exists == 'true'
-        working-directory: ./FRONTEND/FlyPyApp
+        working-directory: ./FRONTEND
         run: npm ci
 
-      - name: Ejecutar ESLint
-        if: steps.check-frontend.outputs.exists == 'true'
-        working-directory: ./FRONTEND/FlyPyApp
-        run: npm run lint || echo "⚠️ Lint no configurado aún"
+      - name: Ejecutar lint
+        working-directory: ./FRONTEND
+        run: npm run lint || echo "⚠️ Lint no configurado"
 
-  # Job 5: Resumen final
-  summary:
-    name: Resumen de CI
+  resumen:
+    name: 📊 Resumen CI/CD
     runs-on: ubuntu-latest
-    needs: [hello-world, check-structure, lint-backend, lint-frontend]
+    needs: [setup, estructura, backend, frontend]
     if: always()
-    
+
     steps:
       - name: Mostrar resumen
         run: |
           echo "================================"
           echo "   RESUMEN DE EJECUCIÓN"
           echo "================================"
-          echo "✅ Workflow ejecutado correctamente"
-          echo "📊 Jobs completados:"
-          echo "   - Hello World: ${{ needs.hello-world.result }}"
-          echo "   - Verificación estructura: ${{ needs.check-structure.result }}"
-          echo "   - Lint Backend: ${{ needs.lint-backend.result }}"
-          echo "   - Lint Frontend: ${{ needs.lint-frontend.result }}"
+          echo "✅ Setup: ${{ needs.setup.result }}"
+          echo "✅ Estructura: ${{ needs.estructura.result }}"
+          echo "✅ Backend: ${{ needs.backend.result }}"
+          echo "✅ Frontend: ${{ needs.frontend.result }}"
           echo "================================"
-          echo "🎉 ¡CI básico funcionando!"
-          echo "================================"
+          echo "🎉 ¡PyFly CI/CD funcionando!"
