@@ -1,6 +1,16 @@
 import axios from "axios";
 
-export let microsoftClient: any;
+type MicrosoftClientConfig = {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  userinfo_endpoint: string;
+  scope: string;
+};
+
+export let microsoftClient: MicrosoftClientConfig;
 
 export const initMicrosoftClient = async () => {
   const { data } = await axios.get(

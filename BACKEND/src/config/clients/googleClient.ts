@@ -1,6 +1,16 @@
 import axios from "axios";
 
-export let googleClient: any;
+type GoogleClientConfig = {
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  userinfo_endpoint: string;
+  scope: string;
+};
+
+export let googleClient: GoogleClientConfig;
 
 export const initGoogleClient = async () => {
   const { data } = await axios.get("https://accounts.google.com/.well-known/openid-configuration");
