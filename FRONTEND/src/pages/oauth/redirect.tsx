@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useContext } from "react";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
-import type { DecodedToken } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
+import type { DecodedToken } from "@/context/autenticacionContexto";
 import { addToast, ToastProvider } from "@heroui/react";
-import { useRedireccion } from "@/context/redireccion.contexto";
+import { useRedireccion } from "@/context/redireccionContexto";
 
 export default function OAuthRedirectPage() {
   const { setUser } = useContext(AutenticacionContexto)!;
@@ -38,7 +38,7 @@ export default function OAuthRedirectPage() {
     } else {
       navigate("/login");
     }
-  }, []);
+  }, [destino, location.search, navigate, setUser]);
 
   return (
     <>

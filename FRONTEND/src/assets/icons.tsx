@@ -792,7 +792,10 @@ export const CloudinaryIcon = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export const PyodideIcon = ({ className = "", ...props }: any) => (
+export const PyodideIcon = ({
+  className = "",
+  ...props
+}: { className?: string } & React.ImgHTMLAttributes<HTMLImageElement>) => (
   <div
     className={`w-full h-full flex items-center justify-center ${className}`}
   >

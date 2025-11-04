@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import {
   AutenticacionContexto,
   DecodedToken,
-} from "@/context/AutenticacionContexto";
+} from "@/context/autenticacionContexto";
 
 export default function DefaultLayout({
   children,
@@ -27,7 +27,7 @@ export default function DefaultLayout({
         console.error("Token inválido:", err);
       }
     }
-  }, []);
+  }, [user, setUser]);
 
   useEffect(() => {
     const welcome = sessionStorage.getItem("showWelcomeToast");
@@ -56,7 +56,7 @@ export default function DefaultLayout({
       // Si el usuario está logueado pero no tiene rol, redirigir
       window.location.href = "/seleccionar-rol";
     }
-  }, [user]);
+  }, [user, location.pathname]);
 
   return (
     <div className="relative flex flex-col h-screen">

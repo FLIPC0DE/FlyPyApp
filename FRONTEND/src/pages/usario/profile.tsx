@@ -13,7 +13,7 @@ import { useContext } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/react";
 import { title } from "@/components/primitives";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {

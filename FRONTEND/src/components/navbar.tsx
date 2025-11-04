@@ -17,7 +17,7 @@ import { Link } from "@heroui/link";
 import { FlyPyIcon, GithubIcon } from "@/assets/icons";
 import { ThemeSwitch } from "@/context/theme-switch";
 import { siteConfig } from "@/config/site";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";

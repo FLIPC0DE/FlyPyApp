@@ -4,7 +4,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Spinner } from "@heroui/spinner";
 import { addToast, Button, Select, SelectItem } from "@heroui/react";
 import { title } from "@/components/primitives";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { apiRoutes } from "@/lib/api";
 
 export default function EditarPerfilPage() {

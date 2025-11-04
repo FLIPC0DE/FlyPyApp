@@ -5,14 +5,14 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { jwtDecode } from "jwt-decode";
-import type { DecodedToken } from "@/context/AutenticacionContexto";
+import type { DecodedToken } from "@/context/autenticacionContexto";
 import { Eye, EyeOff } from "lucide-react";
 import { addToast, ToastProvider } from "@heroui/react";
 import { FlyPyIcon } from "@/assets/icons";
 import { useNavigate } from "react-router-dom";
-import { useRedireccion } from "@/context/redireccion.contexto";
+import { useRedireccion } from "@/context/redireccionContexto";
 import { ClientesLogin } from "@/components/auth/clientes";
 import { apiRoutes } from "@/lib/api";
 

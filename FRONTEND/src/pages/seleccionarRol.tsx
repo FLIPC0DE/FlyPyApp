@@ -5,7 +5,7 @@ import { title } from "@/components/primitives";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { addToast } from "@heroui/react";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL!;
@@ -27,7 +27,7 @@ export default function SeleccionarRolPage() {
     if (user?.rol_global) {
       navigate("/dashboard");
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const handleSubmit = async () => {
     if (!rolSeleccionado) {
