@@ -2,7 +2,6 @@ import { Request } from "express";
 import { prisma } from "../lib/prisma";
 import { generateToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
 import { Prisma } from "@prisma/client";
 import { sendPasswordRecoveryEmail } from "../lib/mailer";
 

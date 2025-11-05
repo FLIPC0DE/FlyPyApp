@@ -18,7 +18,7 @@ describe("mailer.service.ts", () => {
   it("envía código de verificación correctamente", async () => {
     const email = "pyfly.soporte@gmail.com";
 
-    const res = await sendVerificationCodeService(email);
+    await sendVerificationCodeService(email);
     expect(prisma.verificationCode.create).toHaveBeenCalled();
     expect(sendVerificationEmail).toHaveBeenCalledWith(email, expect.any(String));
   });

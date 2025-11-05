@@ -17,7 +17,7 @@ beforeAll(async () => {
     },
   });
 
-  const res = await request(app).post("/api/auth/login").send({
+  await request(app).post("/api/auth/login").send({
     email: "pyfly.soporte@gmail.com",
     password: "12345678",
   });

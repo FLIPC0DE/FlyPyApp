@@ -130,7 +130,12 @@ export const getDashboardService = async (req: AuthenticatedRequest) => {
     id_rol: user.id_rol,
   };
 
-  let contenido: any = {};
+  type DashboardContenido = {
+    mensaje: string;
+    acciones: string[];
+  };
+
+  let contenido: DashboardContenido = { mensaje: "", acciones: [] };
 
   switch (user.rol_global) {
     case "ADMINISTRADOR":

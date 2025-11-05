@@ -5,7 +5,6 @@ import {
 } from "@/services/auth.service";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordRecoveryEmail } from "@/lib/mailer";
-import bcrypt from "bcrypt";
 
 jest.mock("@/lib/prisma", () => ({
   prisma: {

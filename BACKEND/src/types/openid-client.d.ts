@@ -1,3 +1,5 @@
+import type { Issuer as IssuerType } from "openid-client";
+
 declare module "openid-client" {
-  export const Issuer: any;
+  export const Issuer: typeof IssuerType;
 }

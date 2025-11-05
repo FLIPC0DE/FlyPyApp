@@ -1,10 +1,17 @@
 import { Request, Response } from "express";
 import axios from "axios";
+import type { AxiosResponse } from "axios";
 import { prisma } from "../lib/prisma";
 import { generateToken } from "../utils/jwt";
 import { googleClient } from "../config/clients/googleClient";
 import { microsoftClient } from "../config/clients/microsoftClient";
 import { githubClientConfig } from "../config/clients/githubClient";
+
+type GitHubEmail = {
+  email: string;
+  primary: boolean;
+  verified: boolean;
+};
 
 export const getOAuthRedirectUrl = (provider: "google" | "microsoft" | "github"): string => {
   if (provider === "google") {
@@ -32,8 +39,8 @@ export const handleOAuthLoginService = async (
   console.log("🔍 Código recibido:", req.query.code);
 
   try {
-    let tokenRes: any;
-    let userinfoRes: any;
+    let tokenRes: AxiosResponse;
+    let userinfoRes: AxiosResponse;
     let email = "";
     let nombre = "";
     let avatar: string | null = null;
@@ -111,7 +118,9 @@ export const handleOAuthLoginService = async (
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const primaryEmail = emailsRes.data.find((e: any) => e.primary && e.verified)?.email;
+      const primaryEmail = (emailsRes.data as GitHubEmail[]).find(
+        (e) => e.primary && e.verified
+      )?.email;
 
       email = primaryEmail || userinfoRes.data.email || null;
       nombre = userinfoRes.data.name || userinfoRes.data.login || "Sin nombre";

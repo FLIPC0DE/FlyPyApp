@@ -13,9 +13,10 @@ router.get("/google", (req, res) => {
     const redirectUrl = getOAuthRedirectUrl("google");
     console.log("🔗 Redirigiendo a Google:", redirectUrl);
     res.redirect(redirectUrl);
-  } catch (err: any) {
-    console.error("❌ Error al generar URL de redirección:", err.message);
-    res.status(500).json({ error: err.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error inesperado";
+    console.error("❌ Error al generar URL de redirección:", message);
+    res.status(500).json({ error: message });
   }
 });
 
@@ -26,9 +27,10 @@ router.get("/microsoft", (req, res) => {
     const redirectUrl = getOAuthRedirectUrl("microsoft");
     console.log("🔗 Redirigiendo a Microsoft:", redirectUrl);
     res.redirect(redirectUrl);
-  } catch (err: any) {
-    console.error("❌ Error al generar URL de redirección:", err.message);
-    res.status(500).json({ error: err.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error inesperado";
+    console.error("❌ Error al generar URL de redirección:", message);
+    res.status(500).json({ error: message });
   }
 });
 
@@ -39,9 +41,10 @@ router.get("/github", (req, res) => {
     const redirectUrl = getOAuthRedirectUrl("github");
     console.log("🔗 Redirigiendo a GitHub:", redirectUrl);
     res.redirect(redirectUrl);
-  } catch (err: any) {
-    console.error("❌ Error al generar URL de redirección:", err.message);
-    res.status(500).json({ error: err.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Error inesperado";
+    console.error("❌ Error al generar URL de redirección:", message);
+    res.status(500).json({ error: message });
   }
 });
 

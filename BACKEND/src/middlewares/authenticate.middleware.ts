@@ -1,20 +1,21 @@
-// src/middlewares/authenticate.ts
-import express from "express";
+import { Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
 import { prisma } from "../lib/prisma";
-import { AuthenticatedRequest } from "../types/auth";
+import { AuthenticatedRequest, AuthUser } from "../types/auth";
 
 export const authenticate = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const auth = req.headers.authorization;
     if (!auth?.startsWith("Bearer ")) return res.status(401).json({ error: "No token" });
+
     const token = auth.split(" ")[1];
-    const payload = verifyToken(token);
-    const userId = (payload as any).userId;
+    const payload = verifyToken(token) as Pick<AuthUser, "id_usuario">;
+    const userId = payload.id_usuario;
+
     if (!userId) return res.status(401).json({ error: "Token inválido" });
 
     const user = await prisma.usuario.findUnique({
@@ -24,8 +25,7 @@ export const authenticate = async (
 
     if (!user) return res.status(401).json({ error: "Usuario no encontrado" });
 
-    // aquí hacemos la aserción de tipo para que TS acepte la propiedad user
-    (req as AuthenticatedRequest).user = {
+    req.user = {
       id_usuario: user.id_usuario,
       email: user.email ?? undefined,
       rol_global: user.rol_global ?? null,
@@ -33,7 +33,7 @@ export const authenticate = async (
     };
 
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: "Token inválido" });
   }
 };

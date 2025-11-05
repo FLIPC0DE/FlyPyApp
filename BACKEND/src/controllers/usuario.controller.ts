@@ -9,13 +9,19 @@ import {
   updatePasswordService,
 } from "../services/usuario.service";
 
+const handleError = (res: Response, error: unknown, contexto: string) => {
+  const message =
+    error instanceof Error ? error.message : "Error inesperado";
+  console.error(`❌ Error en ${contexto}:`, message);
+  res.status(500).json({ error: message });
+};
+
 export const getUsuarios = async (req: Request, res: Response) => {
   try {
     const result = await getUsuariosService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en getUsuarios:", err.message);
-    res.status(500).json({ error: err.message || "Error al obtener usuarios" });
+  } catch (error: unknown) {
+    handleError(res, error, "getUsuarios");
   }
 };
 
@@ -23,9 +29,8 @@ export const updateRol = async (req: Request, res: Response) => {
   try {
     const result = await updateRolService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en updateRol:", err.message);
-    res.status(500).json({ error: err.message || "Error al actualizar rol" });
+  } catch (error: unknown) {
+    handleError(res, error, "updateRol");
   }
 };
 
@@ -33,9 +38,8 @@ export const getPerfil = async (req: Request, res: Response) => {
   try {
     const result = await getPerfilService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en getPerfil:", err.message);
-    res.status(500).json({ error: err.message || "Error al obtener perfil" });
+  } catch (error: unknown) {
+    handleError(res, error, "getPerfil");
   }
 };
 
@@ -43,9 +47,8 @@ export const updatePerfil = async (req: Request, res: Response) => {
   try {
     const result = await updatePerfilService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en updatePerfil:", err.message);
-    res.status(500).json({ error: err.message || "Error al actualizar perfil" });
+  } catch (error: unknown) {
+    handleError(res, error, "updatePerfil");
   }
 };
 
@@ -53,9 +56,8 @@ export const updatePassword = async (req: Request, res: Response) => {
   try {
     const result = await updatePasswordService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en updatePassword:", err.message);
-    res.status(500).json({ error: err.message || "Error al actualizar contraseña" });
+  } catch (error: unknown) {
+    handleError(res, error, "updatePassword");
   }
 };
 
@@ -63,9 +65,8 @@ export const getDashboard = async (req: Request, res: Response) => {
   try {
     const result = await getDashboardService(req);
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en getDashboard:", err.message);
-    res.status(500).json({ error: err.message || "Error al obtener dashboard" });
+  } catch (error: unknown) {
+    handleError(res, error, "getDashboard");
   }
 };
 
@@ -73,8 +74,7 @@ export const getMetricas = async (_req: Request, res: Response) => {
   try {
     const result = await getMetricasService();
     res.json(result);
-  } catch (err: any) {
-    console.error("❌ Error en getMetricas:", err.message);
-    res.status(500).json({ error: err.message || "Error al obtener métricas" });
+  } catch (error: unknown) {
+    handleError(res, error, "getMetricas");
   }
 };

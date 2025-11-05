@@ -1,13 +1,13 @@
-import { ZodSchema } from "zod";
-import { Request, Response, NextFunction } from "express";
+import { ZodTypeAny } from "zod";
+import { Response, NextFunction } from "express";
+import { AuthenticatedRequest } from "../types/auth";
 
-export const validate = (schema: ZodSchema<any>) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validate = <T extends ZodTypeAny>(schema: T) => {
+  return (req: AuthenticatedRequest<unknown>, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: result.error.format() });
     }
-    // opcional: reemplazar body con parsed value
     req.body = result.data;
     next();
   };

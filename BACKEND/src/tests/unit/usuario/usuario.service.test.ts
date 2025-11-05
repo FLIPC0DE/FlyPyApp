@@ -3,8 +3,6 @@ import {
   updatePasswordService,
   getDashboardService,
 } from "@/services/usuario.service";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt";
 import { AuthenticatedRequest } from "@/types/auth";
 
 jest.mock("@/lib/prisma", () => ({

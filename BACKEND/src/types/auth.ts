@@ -1,5 +1,3 @@
-// src/types/auth.ts
-
 import { RolTipo } from "@prisma/client";
 import { Request } from "express";
 
@@ -11,7 +9,7 @@ export type AuthUser = {
   nombre?: string;
 };
 
-export interface AuthenticatedRequest<TBody = any> extends Request {
+export interface AuthenticatedRequest<TBody = unknown> extends Request {
   user?: AuthUser;
   body: TBody;
 }

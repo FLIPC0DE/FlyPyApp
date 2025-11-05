@@ -19,11 +19,11 @@ export const sendVerificationCodeService = async (email: string) => {
 };
 
 // 🕳️ Placeholder para recuperación de contraseña
-export const sendPasswordResetService = async (_email: string) => {
-  // lógica futura
-};
+// export const sendPasswordResetService = async (_email: string) => {
+//   // lógica futura
+// };
 
 // 🕳️ Placeholder para notificaciones
-export const sendNotificationService = async (_email: string, _message: string) => {
-  // lógica futura
-};
+// export const sendNotificationService = async (_email: string, _message: string) => {
+//   // lógica futura
+// };

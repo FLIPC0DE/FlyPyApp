@@ -16,14 +16,12 @@ beforeAll(async () => {
       id_rol: 1,
     },
   });
-  
-  const res = await request(app).post("/api/auth/login").send({
+
+  await request(app).post("/api/auth/login").send({
     email: "pyfly.soporte@gmail.com",
     password: "12345678",
   });
 });
-
-
 
 describe("Flujo completo: login → rol → dashboard", () => {
   it("debería iniciar sesión, asignar rol y acceder al dashboard", async () => {

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   sendVerificationCodeService,
-  sendPasswordResetService,
-  sendNotificationService,
+  // sendPasswordResetService,
+  // sendNotificationService,
 } from "../services/mailer.service";
 
 export const sendVerificationCode = async (req: Request, res: Response) => {
