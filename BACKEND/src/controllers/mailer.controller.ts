@@ -3,7 +3,7 @@ import {
   sendVerificationCodeService,
   // sendPasswordResetService,
   // sendNotificationService,
-} from "../services/mailer.service";
+} from "../services/mailer.service.js";
 
 export const sendVerificationCode = async (req: Request, res: Response) => {
   const { email } = req.body;

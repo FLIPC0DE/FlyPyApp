@@ -1,6 +1,6 @@
 import { ZodTypeAny } from "zod";
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types/auth";
+import { AuthenticatedRequest } from "../types/auth.js";
 
 export const validate = <T extends ZodTypeAny>(schema: T) => {
   return (req: AuthenticatedRequest<unknown>, res: Response, next: NextFunction) => {

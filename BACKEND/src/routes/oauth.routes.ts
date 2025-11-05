@@ -3,8 +3,8 @@ import {
   googleCallback,
   microsoftCallback,
   githubCallback,
-} from "../controllers/oauth.controller";
-import { getOAuthRedirectUrl } from "../services/oauth.service";
+} from "../controllers/oauth.controller.js";
+import { getOAuthRedirectUrl } from "../services/oauth.service.js";
 
 const router = Router();
 

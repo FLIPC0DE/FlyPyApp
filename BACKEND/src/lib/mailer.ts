@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { renderFlyPyEmailTemplate } from "./template/email.template";
+import { renderFlyPyEmailTemplate } from "./template/email.template.js";
 
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,

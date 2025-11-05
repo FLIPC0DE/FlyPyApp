@@ -6,10 +6,10 @@ import {
   validarCodigoRecuperacion,
   enviarCodigoRecuperacion,
   cambiarPasswordRecuperacion,
-} from "../controllers/auth.controller";
-import { validate } from "../middlewares/validate.middleware";
-import { registerSchema } from "../validators/register.validator";
-import { loginSchema } from "../validators/login.validator";
+} from "../controllers/auth.controller.js";
+import { validate } from "../middlewares/validate.middleware.js";
+import { registerSchema } from "../validators/register.validator.js";
+import { loginSchema } from "../validators/login.validator.js";
 
 const router = Router();
 

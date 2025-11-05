@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares/authenticate.middleware";
-import { requireGlobalRol, requireRol } from "../middlewares/requireRol.middleware";
+import { authenticate } from "../middlewares/authenticate.middleware.js";
+import { requireGlobalRol, requireRol } from "../middlewares/requireRol.middleware.js";
 import {
   getDashboard,
   getMetricas,
@@ -9,7 +9,7 @@ import {
   updatePassword,
   updatePerfil,
   updateRol,
-} from "../controllers/usuario.controller";
+} from "../controllers/usuario.controller.js";
 
 const router = Router();
 

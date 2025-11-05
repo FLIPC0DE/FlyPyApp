@@ -1,9 +1,9 @@
 import { Request } from "express";
-import { prisma } from "../lib/prisma";
-import { generateToken } from "../utils/jwt";
+import { prisma } from "../lib/prisma.js";
+import { generateToken } from "../utils/jwt.js";
 import bcrypt from "bcrypt";
 import { Prisma } from "@prisma/client";
-import { sendPasswordRecoveryEmail } from "../lib/mailer";
+import { sendPasswordRecoveryEmail } from "../lib/mailer.js";
 
 type UsuarioConPerfil = Prisma.UsuarioGetPayload<{ include: { perfil: true } }>;
 

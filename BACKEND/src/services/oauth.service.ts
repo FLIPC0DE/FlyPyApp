@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import type { AxiosResponse } from "axios";
-import { prisma } from "../lib/prisma";
-import { generateToken } from "../utils/jwt";
-import { googleClient } from "../config/clients/googleClient";
-import { microsoftClient } from "../config/clients/microsoftClient";
-import { githubClientConfig } from "../config/clients/githubClient";
+import { prisma } from "../lib/prisma.js";
+import { generateToken } from "../utils/jwt.js";
+import { googleClient } from "../config/clients/googleClient.js";
+import { microsoftClient } from "../config/clients/microsoftClient.js";
+import { githubClientConfig } from "../config/clients/githubClient.js";
 
 type GitHubEmail = {
   email: string;

@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { sendVerificationEmail } from "../lib/mailer";
+import { prisma } from "../lib/prisma.js";
+import { sendVerificationEmail } from "../lib/mailer.js";
 import crypto from "crypto";
 
 export const sendVerificationCodeService = async (email: string) => {

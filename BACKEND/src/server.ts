@@ -2,10 +2,10 @@ import "dotenv/config";
 import express, { Request, Response } from "express";
 import cors from "cors";
 
-import authRouter from "./routes/auth.routes";
-import usuarioRouter from "./routes/usuario.routes";
-import oauthRouter from "./routes/oauth.routes";
-import verificacionRouter from "./routes/verificacion.routes";
+import authRouter from "./routes/auth.routes.js";
+import usuarioRouter from "./routes/usuario.routes.js";
+import oauthRouter from "./routes/oauth.routes.js";
+import verificacionRouter from "./routes/verificacion.routes.js";
 
 const app = express();
 

@@ -1,7 +1,7 @@
-import { prisma } from "../lib/prisma";
-import { AuthenticatedRequest } from "../types/auth";
+import { prisma } from "../lib/prisma.js";
+import { AuthenticatedRequest } from "../types/auth.js";
 import { RolTipo } from "@prisma/client";
-import { generateToken } from "../utils/jwt";
+import { generateToken } from "../utils/jwt.js";
 import bcrypt from "bcrypt";
 
 export const getUsuariosService = async (req: AuthenticatedRequest) => {
@@ -22,27 +22,9 @@ export const getUsuariosService = async (req: AuthenticatedRequest) => {
   });
 };
 
-// export const updateRolService = async (req: AuthenticatedRequest) => {
-//   const { rol_global } = req.body;
-//   const userId = req.user?.id_usuario;
+type UpdateRolBody = { rol_global: RolTipo };
 
-//   if (!rol_global || !Object.values(RolTipo).includes(rol_global)) {
-//     throw new Error("Rol no válido o no encontrado");
-//   }
-
-//   const rol = await prisma.rol.findUnique({ where: { tipo: rol_global } });
-//   if (!rol) throw new Error("Rol no encontrado en la base de datos");
-
-//   return await prisma.usuario.update({
-//     where: { id_usuario: userId },
-//     data: {
-//       rol_global,
-//       id_rol: rol.id_rol,
-//     },
-//   });
-// };
-
-export const updateRolService = async (req: AuthenticatedRequest) => {
+export const updateRolService = async (req: AuthenticatedRequest<UpdateRolBody>) => {
   const { rol_global } = req.body;
   const userId = req.user?.id_usuario;
 
@@ -75,13 +57,18 @@ export const updateRolService = async (req: AuthenticatedRequest) => {
   return { user: usuarioActualizado, token };
 };
 
-
 export const getPerfilService = async (req: AuthenticatedRequest) => {
   const userId = req.user?.id_usuario;
   return await prisma.perfil.findUnique({ where: { id_usuario: userId } });
 };
 
-export const updatePerfilService = async (req: AuthenticatedRequest) => {
+type UpdatePerfilBody = {
+  nombre?: string;
+  institucion?: string;
+  carrera?: string;
+};
+
+export const updatePerfilService = async (req: AuthenticatedRequest<UpdatePerfilBody>) => {
   const userId = req.user?.id_usuario;
   if (!userId) throw new Error("Usuario no autenticado");
 
@@ -105,7 +92,9 @@ export const updatePerfilService = async (req: AuthenticatedRequest) => {
   return { success: true };
 };
 
-export const updatePasswordService = async (req: AuthenticatedRequest) => {
+type UpdatePasswordBody = { nuevaPassword: string };
+
+export const updatePasswordService = async (req: AuthenticatedRequest<UpdatePasswordBody>) => {
   const userId = req.user?.id_usuario;
   const { nuevaPassword } = req.body;
 

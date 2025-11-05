@@ -7,7 +7,7 @@ import {
   getMetricasService,
   updatePerfilService,
   updatePasswordService,
-} from "../services/usuario.service";
+} from "../services/usuario.service.js";
 
 const handleError = (res: Response, error: unknown, contexto: string) => {
   const message =

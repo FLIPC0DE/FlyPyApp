@@ -3,7 +3,7 @@ import {
   sendVerificationCode,
   sendPasswordReset,
   sendNotification,
-} from "../controllers/mailer.controller";
+} from "../controllers/mailer.controller.js";
 
 const router = Router();
 

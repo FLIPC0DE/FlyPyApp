@@ -1,6 +1,6 @@
-import app from "./server";
-import { initGoogleClient } from "./config/clients/googleClient";
-import { initMicrosoftClient } from "./config/clients/microsoftClient";
+import app from "./server.js";
+import { initGoogleClient } from "./config/clients/googleClient.js";
+import { initMicrosoftClient } from "./config/clients/microsoftClient.js";
 
 const PORT = process.env.PORT || 3000;
 

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { handleOAuthLoginService } from "../services/oauth.service";
+import { handleOAuthLoginService } from "../services/oauth.service.js";
 
 export const googleCallback = async (req: Request, res: Response) => {
   await handleOAuthLoginService(req, res, "google");
