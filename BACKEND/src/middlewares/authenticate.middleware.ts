@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.js";
 import { prisma } from "../lib/prisma.js";
-import { AuthenticatedRequest, AuthUser } from "../types/auth.js";
+import { AuthenticatedRequest } from "../types/auth.js";
 
 export const authenticate = async (
   req: AuthenticatedRequest,
