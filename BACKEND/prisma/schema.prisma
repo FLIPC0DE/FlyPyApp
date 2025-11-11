@@ -124,6 +124,9 @@ model Usuario {
   respuestas              CheckpointRespuesta[]
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @default(now())
+  comentarios  Comentario[]   @relation("UsuarioComentarios")
+
+  @@map("usuario")
 }
 
 model Perfil {
@@ -165,6 +168,9 @@ model Curso {
   fecha_fin     DateTime?
   publicado     Boolean            @default(false)
   estado        String? // draft, published, archived
+  comentarios   Comentario[]   @relation("CursoComentarios")
+
+  @@map("curso")
 
   // 🔹 Relaciones
   modulos       Modulo[]           // <-- Nueva relación inversa
@@ -178,6 +184,17 @@ model Curso {
   updatedAt     DateTime           @updatedAt
 }
 
+model Comentario {
+  id_comentario Int       @id @default(autoincrement())
+  contenido     String
+  fecha         DateTime  @default(now())
+
+  id_curso      Int
+  curso         Curso     @relation("CursoComentarios", fields: [id_curso], references: [id_curso])
+
+  id_usuario    Int
+  usuario       Usuario   @relation("UsuarioComentarios", fields: [id_usuario], references: [id_usuario])
+}
 
 model Modulo {
   id_modulo Int      @id @default(autoincrement())
