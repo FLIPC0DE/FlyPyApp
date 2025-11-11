@@ -1,9 +1,9 @@
 import express from "express";
-import { registrarCurso} from "../controllers/registroCurso.controller.js";
+import { registrarCurso, obtenerCursos } from "../controllers/registroCurso.controller";
 
 const router = express.Router();
 
-// POST /api/auth/registrarCurso
 router.post("/registrarCurso", registrarCurso);
+router.get("/listarCursos", obtenerCursos); // 👈 Nueva ruta
 
 export default router;

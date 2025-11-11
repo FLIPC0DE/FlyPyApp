@@ -6,6 +6,7 @@ import authRouter from "./routes/auth.routes";
 import usuarioRouter from "./routes/usuario.routes";
 import oauthRouter from "./routes/oauth.routes";
 import verificacionRouter from "./routes/verificacion.routes";
+import registrarCursoRouter from "./routes/registroCurso.routes";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/verificacion", verificacionRouter);
 app.use("/api/usuarios", usuarioRouter);
 app.use("/api/oauth", oauthRouter);
+app.use("/api/cursos", registrarCursoRouter);
 
 app.use((req, res) => res.status(404).json({ error: "No encontrado" }));
 
