@@ -64,6 +64,32 @@ jobs:
         working-directory: ./BACKEND
         run: npm ci
 
+      - name: Cargar secrets en entorno
+        working-directory: ./BACKEND
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> $GITHUB_ENV
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> $GITHUB_ENV
+          echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "MICROSOFT_CLIENT_ID=${{ secrets.MICROSOFT_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "MICROSOFT_CLIENT_SECRET=${{ secrets.MICROSOFT_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}" >> $GITHUB_ENV
+          echo "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" >> $GITHUB_ENV
+
+      - name: Generar Prisma Client
+        working-directory: ./BACKEND
+        run: npx prisma generate
+
+      - name: Aplicar migraciones
+        working-directory: ./BACKEND
+        run: npx prisma migrate deploy
+
+      - name: Poblar base de datos (seed)
+        working-directory: ./BACKEND
+        run: npm run prisma:seed
+
       - name: Ejecutar lint
         working-directory: ./BACKEND
         run: npm run lint || echo "⚠️ Lint no configurado"
