@@ -6,17 +6,17 @@ const prisma = new PrismaClient();
 // 🟢 Crear un nuevo comentario
 export const crearComentario = async (req: Request, res: Response) => {
   try {
-    const { usuarioId, cursoId, contenido } = req.body;
+    const {id_curso, id_usuario, contenido} = req.body;
 
-    if (!usuarioId || !cursoId || !contenido) {
+    if (!id_usuario || !id_curso || !contenido) {
       return res.status(400).json({ error: "Faltan datos obligatorios." });
     }
 
     const nuevoComentario = await prisma.comentario.create({
       data: {
         contenido,
-        usuarioId: Number(usuarioId),
-        cursoId: Number(cursoId),
+        id_usuario : Number(id_usuario),
+        id_curso: Number(id_curso),
       },
     });
 
@@ -37,7 +37,7 @@ export const obtenerComentariosPorCurso = async (req: Request, res: Response) =>
 
     const comentarios = await prisma.comentario.findMany({
       where: {
-        cursoId: Number(idCurso),
+        id_curso: Number(idCurso),
       },
       include: {
         usuario: {

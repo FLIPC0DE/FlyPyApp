@@ -1,44 +1,25 @@
-/**import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-export const registrarCurso = async (req: Request, res: Response) => {
-  try {
-    const { idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso } = req.body;
-
-    console.log(idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso);
-
-    const nuevoCurso = await prisma.curso.create({
-      data: {
-      id_creador: idUsuario,
-      titulo_curso: tituloCurso,
-      slug: "el cursito",
-      descripcion: descripcion,
-      fecha_inicio: new Date(),
-      fecha_fin: new Date(),
-      publicado: true,
-      },
-    });
-
-    res.status(201).json({
-      message: "Curso registrado exitosamente",
-      curso: nuevoCurso,
-    });
-  } catch (error) {
-    console.error("Error al registrar curso:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-};**/
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+function generarSlug(titulo: string) {
+  const base = titulo
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, "-");
+
+  const random = Math.random().toString(36).substring(2, 7);
+
+  return `${base}-${random}`;
+}
+
 export const registrarCurso = async (req: Request, res: Response): Promise<void> => {
   try {
     const { idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso } = req.body;
-
+    
+    const slugGenerado = generarSlug(tituloCurso);
+    
     console.log("📥 Datos recibidos:", idUsuario, fechaInicio, fechaFin, descripcion, tituloCurso);
 
     if (!idUsuario || !fechaInicio || !fechaFin || !descripcion || !tituloCurso) {
@@ -50,7 +31,7 @@ export const registrarCurso = async (req: Request, res: Response): Promise<void>
       data: {
         id_creador: parseInt(idUsuario), // ✅ Convertir a número
         titulo_curso: tituloCurso,
-        slug: "predeterminado", // genera slug dinámico
+        slug: slugGenerado, // genera slug dinámico
         descripcion: descripcion,
         fecha_inicio: new Date(fechaInicio), // ✅ Usa fecha del formulario
         fecha_fin: new Date(fechaFin),
@@ -72,7 +53,7 @@ export const registrarCurso = async (req: Request, res: Response): Promise<void>
 export const obtenerCursos = async (_req: Request, res: Response) => {
   try {
     const cursos = await prisma.curso.findMany({
-      orderBy: { id_curso: "desc" }, // ordena por más recientes
+      orderBy: { id_curso: "asc" }, // ordena por más recientes
     });
     res.json(cursos);
   } catch (error) {
