@@ -1,14 +1,3 @@
-// import { title } from "@/components/primitives";
-
-// export default function ProfilePage() { // Cambia el nombre según la página
-//   return (
-//       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-//         <h1 className={title({ color: "primary" })}>Perfil</h1>
-//         <p className="text-default-600">Página en construcción 🚧</p>
-//       </section>
-//   );
-// }
-
 import { useContext } from "react";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/react";

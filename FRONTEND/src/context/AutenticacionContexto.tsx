@@ -1,3 +1,4 @@
+// context/autenticacionContexto.tsx
 import { createContext } from "react";
 
 export interface DecodedToken {
@@ -14,9 +15,9 @@ export interface AutenticacionContextoType {
   user: DecodedToken | null;
   setUser: (user: DecodedToken | null) => void;
   logout: () => void;
+  token: string | null; // 👈 nuevo
 }
 
 export const AutenticacionContexto = createContext<
   AutenticacionContextoType | undefined
 >(undefined);
-

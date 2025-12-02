@@ -7,6 +7,7 @@ import { Provider } from "./provider.tsx";
 import "@/styles/globals.css";
 import { AutenticacionProvider } from "./context/autenticacionProvider.tsx";
 import { RedireccionProvider } from "./context/redireccionProvider.tsx";
+import { ToastProvider } from "@heroui/react";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -14,7 +15,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Provider>
         <RedireccionProvider>
           <AutenticacionProvider>
-            <App />
+            <ToastProvider placement="top-center" toastOffset={15} />
+              <App />
           </AutenticacionProvider>
         </RedireccionProvider>
       </Provider>

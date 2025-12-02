@@ -4,7 +4,7 @@ import IndexPage from "@/pages/index";
 import PlaygroundPage from "@/pages/playground";
 import AboutPage from "@/pages/about";
 import NotFoundPage from "./pages/404";
-import CoursesPage from "./pages/usario/courses";
+import CoursesPage from "./pages/curso";
 import LoginPage from "./pages/auth/login";
 import RegisterPage from "./pages/auth/register";
 import DashboardPage from "./pages/usario/dashboard";
@@ -18,21 +18,23 @@ import ProfilePage from "./pages/usario/profile";
 import SeleccionarRolPage from "./pages/seleccionarRol";
 import OAuthRedirectPage from "./pages/oauth/redirect";
 import RutaProtegida from "./layouts/rutaProtegida";
-import { ToastProvider } from "@heroui/react";
 import EditarPerfilPage from "./pages/usario/editarPerfil";
 import CambiarContraseñaPage from "./pages/usario/cambiarContraseña";
 import RecuperarContraseñaPage from "./pages/auth/recuperarContraseña";
+import CursoDetallePage from "./pages/curso/detalle";
+import CrearCursoPage from "./pages/curso/crearCurso";
+import EditarCursoPage from "./pages/curso/editarCurso";
 
 function App() {
   return (
     <>
-      <ToastProvider placement="top-center" toastOffset={60} />
       <Routes>
         {/* Rutas públicas */}
         <Route element={<IndexPage />} path="/" />
-        <Route element={<CoursesPage />} path="/courses" />
+        <Route element={<CoursesPage />} path="/cursos" />
+        <Route element={<CursoDetallePage />} path="/cursos/:id" />
         <Route element={<PlaygroundPage />} path="/playground" />
-        <Route element={<AboutPage />} path="/about" />
+        <Route element={<AboutPage />} path="/sobre-nosotros" />
         <Route element={<LoginPage />} path="/login" />
         <Route element={<RegisterPage />} path="/register" />
         <Route element={<RecuperarContraseñaPage />} path="/recuperar" />
@@ -43,7 +45,7 @@ function App() {
 
         {/* Rutas privadas protegidas */}
         <Route
-          path="/dashboard"
+          path="/panel-de-control"
           element={
             <RutaProtegida>
               <DashboardPage />
@@ -51,7 +53,33 @@ function App() {
           }
         />
         <Route
-          path="/my-courses"
+          path="/cursos/crear-curso"
+          element={
+            <RutaProtegida
+              rolesPermitidos={["DOCENTE_EJECUTOR", "ADMINISTRADOR"]}
+            >
+              <CrearCursoPage />
+            </RutaProtegida>
+          }
+        />
+        <Route
+          path="/cursos/:id/editar"
+          element={
+            <RutaProtegida
+              rolesPermitidos={[
+                "ADMINISTRADOR",
+                "DOCENTE_EJECUTOR",
+                "DOCENTE_EDITOR",
+                "ADMIN_AYUDANTE",
+              ]}
+            >
+              <EditarCursoPage />
+            </RutaProtegida>
+          }
+        />
+
+        <Route
+          path="/mis-cursos"
           element={
             <RutaProtegida
               rolesPermitidos={[
@@ -65,7 +93,7 @@ function App() {
           }
         />
         <Route
-          path="/profile"
+          path="/perfil"
           element={
             <RutaProtegida>
               <ProfilePage />
@@ -89,7 +117,7 @@ function App() {
           }
         />
         <Route
-          path="/progress"
+          path="/progreso"
           element={
             <RutaProtegida rolesPermitidos={["ESTUDIANTE"]}>
               <ProgressPage />
@@ -105,7 +133,7 @@ function App() {
           }
         />
         <Route
-          path="/analytics"
+          path="/analitica"
           element={
             <RutaProtegida
               rolesPermitidos={["DOCENTE_EJECUTOR", "ADMINISTRADOR"]}
@@ -115,7 +143,7 @@ function App() {
           }
         />
         <Route
-          path="/settings"
+          path="/configuracion"
           element={
             <RutaProtegida>
               <SettingsPage />
@@ -123,7 +151,7 @@ function App() {
           }
         />
         <Route
-          path="/help"
+          path="/ayuda"
           element={
             <RutaProtegida>
               <HelpPage />

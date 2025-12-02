@@ -25,7 +25,7 @@ export default function SeleccionarRolPage() {
 
   useEffect(() => {
     if (user?.rol_global) {
-      navigate("/dashboard");
+      navigate("/panel-de-control");
     }
   }, [user, navigate]);
 
@@ -66,7 +66,7 @@ export default function SeleccionarRolPage() {
         });
         localStorage.setItem("token", data.token);
         setUser(data.user);
-        navigate("/dashboard");
+        navigate("/panel-de-control");
       } else {
         addToast({
           title: "Error al asignar rol",

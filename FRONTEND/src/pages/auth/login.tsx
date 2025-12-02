@@ -9,7 +9,7 @@ import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { jwtDecode } from "jwt-decode";
 import type { DecodedToken } from "@/context/autenticacionContexto";
 import { Eye, EyeOff } from "lucide-react";
-import { addToast, ToastProvider } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import { FlyPyIcon } from "@/assets/icons";
 import { useNavigate } from "react-router-dom";
 import { useRedireccion } from "@/context/redireccionContexto";
@@ -67,14 +67,8 @@ export default function LoginPage() {
         setEmail("");
         setPassword("");
 
-        addToast({
-          title: "Inicio de sesión exitoso ✅",
-          description: "Bienvenido de nuevo",
-          color: "success",
-        });
-
         sessionStorage.setItem("showWelcomeToast", "true");
-        navigate(destino ?? "/dashboard");
+        navigate(destino ?? "/panel-de-control");
       } else {
         addToast({
           title: "Error de autenticación",
@@ -100,7 +94,6 @@ export default function LoginPage() {
 
   return (
     <DefaultLayout>
-      <ToastProvider placement="top-center" toastOffset={60} />
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <Card>

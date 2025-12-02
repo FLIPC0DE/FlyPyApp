@@ -4,7 +4,7 @@ import { apiRoutes } from "@/lib/api";
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { addToast, ToastProvider } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import DefaultLayout from "@/layouts/default";
 import { title } from "@/components/primitives";
 import { Eye, EyeOff } from "lucide-react";
@@ -140,7 +140,6 @@ export default function RecuperarContraseñaPage() {
 
     return (
         <DefaultLayout>
-            <ToastProvider placement="top-center" toastOffset={60} />
             <section className="flex flex-col items-center justify-center py-8 md:py-10">
                 <form className="w-full max-w-md">
                     <Card>

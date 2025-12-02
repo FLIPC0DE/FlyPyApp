@@ -5,6 +5,7 @@ import authRouter from "./routes/auth.routes.js";
 import usuarioRouter from "./routes/usuario.routes.js";
 import oauthRouter from "./routes/oauth.routes.js";
 import verificacionRouter from "./routes/verificacion.routes.js";
+import cursoRouter from "./routes/curso.routes.js";
 
 const app = express();
 
@@ -15,10 +16,11 @@ app.get("/", (_req, res) => {
     res.send("PyFly backend funcionando 🚀");
 });
 
+app.use("/api/oauth", oauthRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/verificacion", verificacionRouter);
 app.use("/api/usuarios", usuarioRouter);
-app.use("/api/oauth", oauthRouter);
+app.use("/api/cursos", cursoRouter);
 
 app.use((req, res) => res.status(404).json({ error: "No encontrado" }));
 app.use((err, _req, res, _next) => {

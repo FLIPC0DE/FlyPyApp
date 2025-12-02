@@ -4,7 +4,6 @@ import { jwtDecode } from "jwt-decode";
 import { useContext } from "react";
 import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import type { DecodedToken } from "@/context/autenticacionContexto";
-import { addToast, ToastProvider } from "@heroui/react";
 import { useRedireccion } from "@/context/redireccionContexto";
 
 export default function OAuthRedirectPage() {
@@ -22,16 +21,10 @@ export default function OAuthRedirectPage() {
       const decoded = jwtDecode<DecodedToken>(token);
       setUser(decoded);
 
-      addToast({
-        title: "Inicio de sesión exitoso ✅",
-        description: "Bienvenido de nuevo",
-        color: "success",
-      });
-
       sessionStorage.setItem("showWelcomeToast", "true");
       // navigate(destino ?? "/seleccionar-rol");
       if (decoded.rol_global) {
-        navigate(destino ?? "/dashboard");
+        navigate(destino ?? "/panel-de-control");
       } else {
         navigate("/seleccionar-rol");
       }
@@ -42,7 +35,6 @@ export default function OAuthRedirectPage() {
 
   return (
     <>
-      <ToastProvider placement="top-center" toastOffset={60} />
       <p className="p-6">Procesando inicio de sesión...</p>
     </>
   );

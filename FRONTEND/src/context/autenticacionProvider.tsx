@@ -1,3 +1,4 @@
+// context/autenticacionProvider.tsx
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -7,14 +8,16 @@ import type { DecodedToken } from "./autenticacionContexto";
 
 export const AutenticacionProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<DecodedToken | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
       try {
-        const decoded = jwtDecode<DecodedToken>(token);
+        const decoded = jwtDecode<DecodedToken>(storedToken);
         console.log("🔍 Token decodificado:", decoded);
         setUser(decoded);
+        setToken(storedToken);
 
         const showToast = sessionStorage.getItem("showWelcomeToast");
         if (showToast === "true") {
@@ -38,9 +41,10 @@ export const AutenticacionProvider = ({ children }: { children: ReactNode }) => 
 
     console.log("👋 Cerrando sesión de:", { nombre, rol });
 
-    const mensaje = rol === "ESTUDIANTE"
-      ? `Tu esfuerzo se nota cada día más, ${nombre}. ¡Sigue así!`
-      : `Gracias por tu trabajo como ${rol}, ${nombre}.`;
+    const mensaje =
+      rol === "ESTUDIANTE"
+        ? `Tu esfuerzo se nota cada día más, ${nombre}. ¡Sigue así!`
+        : `Gracias por tu trabajo como ${rol}, ${nombre}.`;
 
     addToast({
       title: "Sesión cerrada 👋",
@@ -50,10 +54,11 @@ export const AutenticacionProvider = ({ children }: { children: ReactNode }) => 
 
     localStorage.removeItem("token");
     setUser(null);
+    setToken(null);
   };
 
   return (
-    <AutenticacionContexto.Provider value={{ user, setUser, logout }}>
+    <AutenticacionContexto.Provider value={{ user, setUser, logout, token }}>
       {children}
     </AutenticacionContexto.Provider>
   );

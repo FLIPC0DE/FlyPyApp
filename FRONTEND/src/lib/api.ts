@@ -25,4 +25,11 @@ export const apiRoutes = {
     microsoft: `${BASE_URL}/api/oauth/microsoft`,
     github: `${BASE_URL}/api/oauth/github`,
   },
+  cursos: {
+    crear: `${BASE_URL}/api/cursos`,
+    listar: `${BASE_URL}/api/cursos`,
+    detalle: (id: number) => `${BASE_URL}/api/cursos/${id}`,
+    editar: (id: number) => `${BASE_URL}/api/cursos/${id}`,
+    eliminar: (id: number) => `${BASE_URL}/api/cursos/${id}`
+  }
 };
