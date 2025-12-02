@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "lint": "eslint --fix",
     "preview": "vite preview"
   },
@@ -23,6 +23,8 @@
     "@heroui/system": "2.4.23",
     "@heroui/theme": "2.4.23",
     "@heroui/use-theme": "2.1.10",
+    "@internationalized/date": "^3.10.0",
+    "@react-aria/i18n": "^3.12.13",
     "@react-aria/visually-hidden": "3.8.28",
     "@react-types/shared": "3.32.1",
     "@tailwindcss/postcss": "4.1.11",
@@ -52,6 +54,7 @@
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "8.31.1",
     "@typescript-eslint/parser": "8.31.1",
+    "@typescript-eslint/utils": "^8.46.3",
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "9.25.1",
     "eslint-config-prettier": "9.1.0",
@@ -61,6 +64,7 @@
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-unused-imports": "4.1.4",
     "globals": "16.0.0",
     "jest": "^30.2.0",

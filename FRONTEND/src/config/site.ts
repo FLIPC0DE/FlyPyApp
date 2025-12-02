@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "PyFly",
+  name: "FlyPy",
   description: "Plataforma universitaria de cursos Python con playground interactivo y sistema de evaluación avanzado.",
   navItems: [
     {
@@ -10,7 +10,7 @@ export const siteConfig = {
     },
     {
       label: "Cursos",
-      href: "/courses",
+      href: "/cursos",
     },
     {
       label: "Playground",
@@ -18,25 +18,25 @@ export const siteConfig = {
     },
     {
       label: "Sobre Nosotros",
-      href: "/about",
+      href: "/sobre-nosotros",
     },
   ],
   navMenuItems: [
     {
       label: "Mi Perfil",
-      href: "/profile",
+      href: "/perfil",
     },
     {
       label: "Dashboard",
-      href: "/dashboard",
+      href: "/panel-de-control",
     },
     {
       label: "Mis Cursos",
-      href: "/my-courses",
+      href: "/mis-cursos",
     },
     {
       label: "Progreso",
-      href: "/progress",
+      href: "/progreso",
     },
     {
       label: "Checkpoints",
@@ -44,23 +44,23 @@ export const siteConfig = {
     },
     {
       label: "Analytics",
-      href: "/analytics",
+      href: "/analitica",
     },
     {
       label: "Configuración",
-      href: "/settings",
+      href: "/configuracion",
     },
     {
       label: "Ayuda y Soporte",
-      href: "/help",
+      href: "/ayuda",
     },
     {
       label: "Cerrar Sesión",
-      href: "/logout",
+      href: "/cerrar-sesion",
     },
   ],
   links: {
-    github: "https://github.com/tu-organizacion/pyfly",
+    github: "https://github.com/FLIPC0DE/FlyPyApp",
     docs: "https://docs.pyfly.com",
     support: "mailto:soporte@pyfly.com",
   },

@@ -1,14 +1,14 @@
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
-import { useRedireccion } from "@/context/redireccion.contexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
+import { useRedireccion } from "@/context/redireccionContexto";
 import DefaultLayout from "@/layouts/default";
 import Redireccionando from "@/pages/redireccionando";
 import { useContext, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-type Props = {
+interface Props {
   children: JSX.Element;
   rolesPermitidos?: string[];
-};
+}
 
 export default function RutaProtegida({ children, rolesPermitidos }: Props) {
   const { user } = useContext(AutenticacionContexto)!;
@@ -21,8 +21,8 @@ export default function RutaProtegida({ children, rolesPermitidos }: Props) {
     if (!token) {
       setDestino(location.pathname);
     }
-  }, []);
-
+  }, [token, setDestino, location.pathname]);
+  
   if (!token) {
     setDestino(location.pathname);
     return <Redireccionando destino={location.pathname} />;

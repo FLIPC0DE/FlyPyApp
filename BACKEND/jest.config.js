@@ -1,16 +1,15 @@
-const { createDefaultPreset } = require("ts-jest");
+// jest.config.js
+console.log("✅ Usando jest.config.js");
 
-const tsJestTransformCfg = createDefaultPreset().transform;
-
-/** @type {import("jest").Config} **/
-module.exports = {
+export default {
   testEnvironment: "node",
-  transform: {
-    ...tsJestTransformCfg,
-  },
-  setupFiles: ["<rootDir>/src/jest.setup.ts"],
+  // Ya no transformamos TS, solo JS
+  setupFilesAfterEnv: ["<rootDir>/src/jest.setup.js"],
+
+  // Alias @/ sigue funcionando para tu src
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+
   moduleDirectories: ["node_modules", "src"],
 };

@@ -7,7 +7,7 @@ import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 // import { Select, SelectItem } from "@heroui/select";
 import { Eye, EyeOff } from "lucide-react";
-import { addToast, ToastProvider } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import { FlyPyIcon } from "@/assets/icons";
 import { ClientesLogin } from "@/components/auth/clientes";
 import { apiRoutes } from "@/lib/api";
@@ -137,7 +137,6 @@ export default function RegisterPage() {
 
   return (
     <DefaultLayout>
-      <ToastProvider placement="top-center" toastOffset={60} />
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <Card>

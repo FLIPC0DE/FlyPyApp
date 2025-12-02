@@ -17,7 +17,7 @@ import { Link } from "@heroui/link";
 import { FlyPyIcon, GithubIcon } from "@/assets/icons";
 import { ThemeSwitch } from "@/context/theme-switch";
 import { siteConfig } from "@/config/site";
-import { AutenticacionContexto } from "@/context/AutenticacionContexto";
+import { AutenticacionContexto } from "@/context/autenticacionContexto";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
@@ -91,16 +91,16 @@ export const Navbar = () => {
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Opciones de usuario" variant="flat">
-                <DropdownItem key="profile" href="/profile">
+                <DropdownItem key="profile" href="/perfil">
                   Mi perfil
                 </DropdownItem>
-                <DropdownItem key="dashboard" href="/dashboard">
-                  Dashboard
+                <DropdownItem key="dashboard" href="/panel-de-control">
+                  Panel de control
                 </DropdownItem>
-                <DropdownItem key="my-courses" href="/my-courses">
+                <DropdownItem key="my-courses" href="/mis-cursos">
                   Mis cursos
                 </DropdownItem>
-                <DropdownItem key="progress" href="/progress">
+                <DropdownItem key="progress" href="/progreso">
                   Progreso
                 </DropdownItem>
                 <DropdownItem key="checkpoints" href="/checkpoints">
@@ -110,15 +110,15 @@ export const Navbar = () => {
                     user.rol_global ?? "",
                   )
                   ? (
-                    <DropdownItem key="analytics" href="/analytics">
-                      Analytics
+                    <DropdownItem key="analytics" href="/analitica">
+                      Analítica
                     </DropdownItem>
                   )
                   : null}
-                <DropdownItem key="settings" href="/settings">
+                <DropdownItem key="settings" href="/configuracion">
                   Configuración
                 </DropdownItem>
-                <DropdownItem key="help" href="/help">
+                <DropdownItem key="help" href="/ayuda">
                   Ayuda
                 </DropdownItem>
                 <DropdownItem
