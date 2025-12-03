@@ -124,9 +124,24 @@ export const handleOAuthLoginService = async (
     const frontendBase = process.env.FRONTEND_URL ?? "http://localhost:5173";
     const redirectFinal = `${frontendBase}/oauth-redirect?token=${token}`;
     return res.redirect(redirectFinal);
-  } catch (err) {
-    console.error(`Error en callback de ${provider}:`, err);
-    res.status(500).json({ error: `Error al procesar el login con ${provider}` });
+  } catch (err: any) {
+    console.error(`❌ Error en callback de ${provider}:`, err);
+    console.error("Detalles del error:", {
+      message: err.message,
+      response: err.response?.data,
+      status: err.response?.status,
+      code: req.query.code,
+    });
+    
+    const errorMessage = err.response?.data?.error_description 
+      || err.response?.data?.error 
+      || err.message 
+      || `Error al procesar el login con ${provider}`;
+    
+    res.status(500).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? err.message : undefined
+    });
   }
 };
 
