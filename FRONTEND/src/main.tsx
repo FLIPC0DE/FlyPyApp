@@ -7,6 +7,7 @@ import { Provider } from "./provider.tsx";
 import "@/styles/globals.css";
 import { AuthProvider } from "./context/AutenticacionContexto.tsx";
 import { RedireccionProvider } from "./context/redireccion.contexto.tsx";
+import { CursoProvider }  from "./context/CursoContexto";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Provider>
         <RedireccionProvider>
           <AuthProvider>
-            <App />
+            <CursoProvider>
+              <App />
+            </CursoProvider>
           </AuthProvider>
         </RedireccionProvider>
       </Provider>

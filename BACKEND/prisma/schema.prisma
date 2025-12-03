@@ -33,6 +33,7 @@
 //   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 // }
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -123,6 +124,9 @@ model Usuario {
   respuestas              CheckpointRespuesta[]
   createdAt               DateTime              @default(now())
   updatedAt               DateTime              @default(now())
+  comentarios  Comentario[]   @relation("UsuarioComentarios")
+
+  @@map("usuario")
 }
 
 model Perfil {
@@ -164,14 +168,45 @@ model Curso {
   fecha_fin     DateTime?
   publicado     Boolean            @default(false)
   estado        String? // draft, published, archived
+  comentarios   Comentario[]   @relation("CursoComentarios")
+
+  @@map("curso")
+
+  // 🔹 Relaciones
+  modulos       Modulo[]           // <-- Nueva relación inversa
   topicos       Topico[]
   inscripciones Inscripcion[]
   colaboradores CursoColaborador[]
   media         CursoMedia[]
+  Invitacion    Invitacion[]
+
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
-  Invitacion    Invitacion[]
 }
+
+model Comentario {
+  id_comentario Int       @id @default(autoincrement())
+  contenido     String
+  fecha         DateTime  @default(now())
+
+  id_curso      Int
+  curso         Curso     @relation("CursoComentarios", fields: [id_curso], references: [id_curso])
+
+  id_usuario    Int
+  usuario       Usuario   @relation("UsuarioComentarios", fields: [id_usuario], references: [id_usuario])
+}
+
+model Modulo {
+  id_modulo Int      @id @default(autoincrement())
+  id_curso  Int
+  curso     Curso    @relation(fields: [id_curso], references: [id_curso])
+  nombre    String
+
+  topicos   Topico[] // Relación uno a muchos con Topico
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 /**
  * Usuarios inscritos
@@ -229,6 +264,10 @@ model Topico {
   id_topico          Int                 @id @default(autoincrement())
   id_curso           Int
   curso              Curso               @relation(fields: [id_curso], references: [id_curso])
+
+  id_modulo          Int?                // Nuevo campo
+  modulo             Modulo?             @relation(fields: [id_modulo], references: [id_modulo])
+
   titulo             String
   descripcion        String?             @db.VarChar(1000)
   orden              Int                 @default(0)
@@ -241,6 +280,7 @@ model Topico {
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
+
 
 /**
  * Contenidos genéricos asociados a un tópico (texto, imágenes, slides, video, audio)
