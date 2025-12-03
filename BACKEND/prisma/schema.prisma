@@ -1,8 +1,37 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// generator client {
+//   provider = "prisma-client-js"
+// }
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model Usuario {
+//   id_usuario       Int    @id @default(autoincrement())
+//   nombre   String
+//   email    String @unique
+//   password String
+//   id_rol    Int
+//   rol      Rol    @relation(fields: [id_rol], references: [id_rol])
+//   cursos  Curso[]
+// }
+
+// model Rol {
+//   id_rol          Int       @id @default(autoincrement())
+//   nombre_rol  String    @unique
+//   usuarios    Usuario[]
+// }
+
+// model Curso {
+//   id_curso    Int       @id @default(autoincrement())
+//   id_usuario  Int
+//   titulo_curso  String
+//   descripcion String   @db.VarChar(255)
+//   fecha_inicio DateTime  @db.Date
+//   fecha_fin   DateTime   @db.Date
+//   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+// }
 
 generator client {
   provider = "prisma-client-js"
@@ -13,18 +42,395 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id_usuario       Int    @id @default(autoincrement())
-  nombre   String
-  email    String @unique
-  password String
-  id_rol    Int
-  rol      Rol    @relation(fields: [id_rol], references: [id_rol])
+enum RolTipo {
+  ADMINISTRADOR
+  ADMIN_AYUDANTE
+  DOCENTE_EJECUTOR
+  DOCENTE_EDITOR
+  ESTUDIANTE
+}
+
+enum TopicoTipo {
+  TEXTO_IMAGEN
+  TEXTO_VIDEO
+  TEXTO_SLIDES
+  TEXTO_AUDIO
+  PLAYGROUND
+  VIDEO_PLAYGROUND
+  IMAGE_PLAYGROUND
+}
+
+enum CheckpointTipo {
+  DIAGNOSTICO
+  EVALUATIVO
+}
+
+enum VerificationPurpose {
+  signup
+  password_reset
+  email_change
 }
 
 model Rol {
-  id_rol          Int       @id @default(autoincrement())
-  nombre_rol  String    @unique
-  usuarios    Usuario[]
+  id_rol    Int       @id @default(autoincrement())
+  tipo      RolTipo   @unique
+  nombre    String
+  usuarios  Usuario[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
+model SolicitudRol {
+  id_solicitud     Int      @id @default(autoincrement())
+  id_usuario       Int
+  usuario          Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  rol_solicitado   RolTipo
+  codigo_ingresado String?
+  estado           String   @default("pendiente") // pendiente, aprobado, rechazado
+  motivo           String?
+  revisadoPorId    Int?
+  revisadoPor      Usuario? @relation("RevisorRol", fields: [revisadoPorId], references: [id_usuario])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([id_usuario])
+  @@index([rol_solicitado])
+}
+
+model Usuario {
+  id_usuario              Int                   @id @default(autoincrement())
+  nombre                  String
+  email                   String                @unique
+  password                String?
+  rol_global              RolTipo?
+  id_rol                  Int?
+  rol                     Rol?                  @relation(fields: [id_rol], references: [id_rol])
+  solicitudes_rol         SolicitudRol[]
+  solicitudes_revisadas   SolicitudRol[]        @relation("RevisorRol")
+  perfil                  Perfil?
+  cursos_creados          Curso[]               @relation("CursosCreados")
+  inscripciones           Inscripcion[]
+  colaboraciones          CursoColaborador[]
+  colaboraciones_enviadas CursoColaborador[]    @relation("UsuarioInvitador")
+  invitaciones_enviadas   Invitacion[]          @relation("UsuarioInvitador")
+  invitaciones_recibidas  Invitacion[]          @relation("UsuarioInvitado")
+  verifications           VerificationCode[]
+  analyticsEvents         AnalyticsEvent[]
+  keyEvents               KeyEvent[]
+  sesiones                Session[]
+  cuentasOAuth            CuentaOAuth[]
+  uploads                 Upload[]
+  respuestas              CheckpointRespuesta[]
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @default(now())
+}
+
+model Perfil {
+  id_usuario  Int      @id
+  avatar_url  String? // Cloudinary URL
+  institucion String?
+  carrera     String?
+  usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  updatedAt   DateTime @updatedAt
+}
+
+model CuentaOAuth {
+  id            Int      @id @default(autoincrement())
+  id_usuario    Int
+  usuario       Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  proveedor     String // "google", "github", "microsoft"
+  sub           String // ID único del proveedor (opcional pero recomendable)
+  email         String
+  nombre        String?
+  ultima_sesion DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([proveedor, email]) // evita duplicados por proveedor
+}
+
+/**
+ * Cursos y relación con usuarios
+ */
+
+model Curso {
+  id_curso      Int                @id @default(autoincrement())
+  id_creador    Int
+  creador       Usuario            @relation("CursosCreados", fields: [id_creador], references: [id_usuario])
+  titulo_curso  String
+  slug          String             @unique
+  descripcion   String?            @db.VarChar(1000)
+  fecha_inicio  DateTime?
+  fecha_fin     DateTime?
+  publicado     Boolean            @default(false)
+  estado        String? // draft, published, archived
+  topicos       Topico[]
+  inscripciones Inscripcion[]
+  colaboradores CursoColaborador[]
+  media         CursoMedia[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  Invitacion    Invitacion[]
+}
+
+/**
+ * Usuarios inscritos
+ */
+model Inscripcion {
+  id_inscripcion    Int      @id @default(autoincrement())
+  id_curso          Int
+  curso             Curso    @relation(fields: [id_curso], references: [id_curso])
+  id_usuario        Int
+  usuario           Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  fecha_inscripcion DateTime @default(now())
+  estado            String   @default("active") // active, canceled, completed
+  progress          Float?   @default(0.0) // porcentaje 0-100
+  createdAt         DateTime @default(now())
+
+  @@unique([id_curso, id_usuario])
+}
+
+/**
+ * Roles específicos por curso (colaboradores)
+ */
+model CursoColaborador {
+  id          Int      @id @default(autoincrement())
+  id_curso    Int
+  curso       Curso    @relation(fields: [id_curso], references: [id_curso])
+  id_usuario  Int
+  usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  rol         String // editor, admin, helper
+  invitedById Int?
+  invitedBy   Usuario? @relation("UsuarioInvitador", fields: [invitedById], references: [id_usuario])
+  accepted    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@unique([id_curso, id_usuario])
+}
+
+/**
+ * Media asociado al curso (Cloudinary references)
+ */
+model CursoMedia {
+  id        Int      @id @default(autoincrement())
+  id_curso  Int
+  curso     Curso    @relation(fields: [id_curso], references: [id_curso])
+  tipo      String // image, video, thumbnail
+  url       String
+  publicId  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+/**
+ * Tópicos / módulos dentro de un curso
+ */
+model Topico {
+  id_topico          Int                 @id @default(autoincrement())
+  id_curso           Int
+  curso              Curso               @relation(fields: [id_curso], references: [id_curso])
+  titulo             String
+  descripcion        String?             @db.VarChar(1000)
+  orden              Int                 @default(0)
+  tipo               TopicoTipo
+  disponibleDesde    DateTime?
+  disponibleHasta    DateTime?
+  contenido          Contenido[]
+  checkpoints        Checkpoint[]
+  playgroundSnippets PlaygroundSnippet[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+/**
+ * Contenidos genéricos asociados a un tópico (texto, imágenes, slides, video, audio)
+ */
+model Contenido {
+  id_contenido Int      @id @default(autoincrement())
+  id_topico    Int
+  topico       Topico   @relation(fields: [id_topico], references: [id_topico])
+  tipo         String // text, image, video, slides, audio
+  orden        Int      @default(0)
+  titulo       String?
+  cuerpo       String? // Markdown / HTML / plain text
+  mediaUrl     String?
+  meta         Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/**
+ * Playground: snippets o código precargado por tópico
+ */
+model PlaygroundSnippet {
+  id_snippet Int      @id @default(autoincrement())
+  id_topico  Int
+  topico     Topico   @relation(fields: [id_topico], references: [id_topico])
+  nombre     String?
+  lenguaje   String   @default("python")
+  codigo     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+/**
+ * Checkpoints para tópicos (diagnóstico o evaluativo)
+ */
+model Checkpoint {
+  id_checkpoint Int                  @id @default(autoincrement())
+  id_topico     Int
+  topico        Topico               @relation(fields: [id_topico], references: [id_topico])
+  titulo        String
+  descripcion   String?
+  tipo          CheckpointTipo
+  fecha_inicio  DateTime?
+  fecha_fin     DateTime?
+  tiempo_limite Int? // segundos opcional
+  preguntas     CheckpointPregunta[]
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+/**
+ * Preguntas para checkpoints
+ */
+model CheckpointPregunta {
+  id_pregunta         Int                   @id @default(autoincrement())
+  id_checkpoint       Int
+  checkpoint          Checkpoint            @relation(fields: [id_checkpoint], references: [id_checkpoint])
+  tipo                String // libre, guiada, playground
+  enunciado           String
+  meta                Json?
+  orden               Int                   @default(0)
+  expectedAnswer      Json? // estructura para respuestas esperadas
+  createdAt           DateTime              @default(now())
+  CheckpointRespuesta CheckpointRespuesta[]
+}
+
+/**
+ * Respuestas de estudiantes en checkpoints (evaluativo o diagnóstico)
+ */
+model CheckpointRespuesta {
+  id_respuesta Int                @id @default(autoincrement())
+  id_pregunta  Int
+  pregunta     CheckpointPregunta @relation(fields: [id_pregunta], references: [id_pregunta])
+  id_usuario   Int
+  usuario      Usuario            @relation(fields: [id_usuario], references: [id_usuario])
+  respuesta    String
+  calificacion Float?
+  feedback     String?
+  createdAt    DateTime           @default(now())
+}
+
+/**
+ * Sistema de invitaciones a cursos
+ */
+model Invitacion {
+  id_invitacion  Int       @id @default(autoincrement())
+  id_curso       Int
+  curso          Curso     @relation(fields: [id_curso], references: [id_curso])
+  email          String
+  id_creador     Int
+  creador        Usuario   @relation("UsuarioInvitador", fields: [id_creador], references: [id_usuario])
+  id_usuario     Int?
+  usuario        Usuario?  @relation("UsuarioInvitado", fields: [id_usuario], references: [id_usuario])
+  rol_solicitado String?
+  token          String    @unique
+  accepted       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime?
+}
+
+/**
+ * Verificación de correo (código temporal)
+ */
+model VerificationCode {
+  id_code    Int                 @id @default(autoincrement())
+  id_usuario Int?
+  usuario    Usuario?            @relation(fields: [id_usuario], references: [id_usuario])
+  email      String
+  code       String
+  // purpose    VerificationPurpose
+  purpose    String
+  consumed   Boolean             @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime            @default(now())
+
+  @@index([email])
+  @@index([code])
+}
+
+/**
+ * Sesiones / Revocación de tokens (opcional)
+ */
+model Session {
+  id         Int      @id @default(autoincrement())
+  id_usuario Int
+  usuario    Usuario  @relation(fields: [id_usuario], references: [id_usuario])
+  token_jti  String   @unique
+  user_agent String?
+  ip_address String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @updatedAt
+  revoked    Boolean  @default(false)
+  expiresAt  DateTime
+}
+
+/**
+ * Analytics: eventos generales (tiempo en tópicos, acciones, intentos, errores)
+ */
+model AnalyticsEvent {
+  id_event    Int      @id @default(autoincrement())
+  id_usuario  Int?
+  usuario     Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+  id_curso    Int?
+  id_topico   Int?
+  tipo_evento String // e.g., topic_view, checkpoint_attempt, code_run, focus_lost
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([id_usuario, id_topico])
+  @@index([tipo_evento])
+}
+
+/**
+ * Eventos de teclado / detección de pegado vs escritura (para analytics avanzadas)
+ */
+model KeyEvent {
+  id          Int      @id @default(autoincrement())
+  id_usuario  Int?
+  usuario     Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+  id_topico   Int?
+  evento      String // keydown, keyup, paste
+  key         String?
+  interval_ms Int? // tiempo entre pulsaciones
+  meta        Json?
+  createdAt   DateTime @default(now())
+
+  @@index([id_usuario, id_topico])
+}
+
+/**
+ * Archivos subidos (opcional si necesitas metadata centralizada)
+ */
+model Upload {
+  id         Int      @id @default(autoincrement())
+  id_usuario Int?
+  usuario    Usuario? @relation(fields: [id_usuario], references: [id_usuario])
+  url        String
+  publicId   String?
+  type       String // image, video, other
+  meta       Json?
+  createdAt  DateTime @default(now())
+}
+
+/**
+ * Tabla para almacenar logs/errores si lo deseas en DB (opcional)
+ */
+model AppLog {
+  id        Int      @id @default(autoincrement())
+  nivel     String
+  mensaje   String
+  meta      Json?
+  createdAt DateTime @default(now())
+}
