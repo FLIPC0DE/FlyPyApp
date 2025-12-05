@@ -62,4 +62,27 @@ export const obtenerCursos = async (_req: Request, res: Response) => {
   }
 };
 
+export const obtenerCursosPublicados = async (_req: Request, res: Response) => {
+  try {
+    const cursos = await prisma.curso.findMany({
+      where: {
+        publicado: true,
+      },
+      orderBy: { id_curso: "desc" }, // ordena por más recientes primero
+      include: {
+        creador: {
+          select: {
+            nombre: true,
+            email: true,
+          },
+        },
+      },
+    });
+    res.json(cursos);
+  } catch (error) {
+    console.error("Error al obtener cursos publicados:", error);
+    res.status(500).json({ error: "Error al obtener los cursos publicados" });
+  }
+};
+
 

@@ -1,4 +1,4 @@
-import { PrismaClient, RolTipo } from "@prisma/client";
+import { PrismaClient, RolTipo, Rol } from "@prisma/client";
 
 import bcrypt from "bcrypt";
 
@@ -12,6 +12,7 @@ async function main() {
   await prisma.checkpoint.deleteMany({});
   await prisma.playgroundSnippet.deleteMany({});
   await prisma.contenido.deleteMany({});
+  await prisma.comentario.deleteMany({});
   await prisma.topico.deleteMany({});
   await prisma.cursoMedia.deleteMany({});
   await prisma.cursoColaborador.deleteMany({});
@@ -24,6 +25,7 @@ async function main() {
   await prisma.session.deleteMany({});
   await prisma.upload.deleteMany({});
   await prisma.appLog.deleteMany({});
+  await prisma.cuentaOAuth.deleteMany({});
   await prisma.perfil.deleteMany({});
   await prisma.usuario.deleteMany({});
   await prisma.rol.deleteMany({});
@@ -39,7 +41,7 @@ async function main() {
     { tipo: RolTipo.ESTUDIANTE, nombre: "Estudiante" },
   ];
 
-  const roles = [];
+  const roles: Rol[] = [];
   for (const r of rolesData) {
     const role = await prisma.rol.create({ data: r });
     roles.push(role);

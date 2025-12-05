@@ -78,27 +78,76 @@ export const updateRolService = async (req: AuthenticatedRequest) => {
 
 export const getPerfilService = async (req: AuthenticatedRequest) => {
   const userId = req.user?.id_usuario;
-  return await prisma.perfil.findUnique({ where: { id_usuario: userId } });
+  if (!userId) throw new Error("Usuario no autenticado");
+
+  const perfil = await prisma.perfil.findUnique({ 
+    where: { id_usuario: userId },
+    include: {
+      usuario: {
+        select: {
+          id_usuario: true,
+          nombre: true,
+          email: true,
+          rol_global: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  // Si no existe perfil, crear uno básico
+  if (!perfil) {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id_usuario: userId },
+      select: {
+        id_usuario: true,
+        nombre: true,
+        email: true,
+        rol_global: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      id_usuario: userId,
+      avatar_url: null,
+      institucion: null,
+      carrera: null,
+      grupo: null,
+      usuario,
+    };
+  }
+
+  return perfil;
 };
 
 export const updatePerfilService = async (req: AuthenticatedRequest) => {
   const userId = req.user?.id_usuario;
   if (!userId) throw new Error("Usuario no autenticado");
 
-  const { nombre, institucion, carrera } = req.body;
+  const { nombre, institucion, carrera, grupo } = req.body;
 
-  await prisma.usuario.update({
-    where: { id_usuario: userId },
-    data: { nombre },
-  });
+  // Actualizar nombre del usuario
+  if (nombre) {
+    await prisma.usuario.update({
+      where: { id_usuario: userId },
+      data: { nombre },
+    });
+  }
 
+  // Actualizar o crear perfil
   await prisma.perfil.upsert({
     where: { id_usuario: userId },
-    update: { institucion, carrera },
+    update: { 
+      institucion: institucion ?? undefined,
+      carrera: carrera ?? undefined,
+      grupo: grupo ?? undefined,
+    },
     create: {
       id_usuario: userId,
-      institucion,
-      carrera,
+      institucion: institucion ?? null,
+      carrera: carrera ?? null,
+      grupo: grupo ?? null,
     },
   });
 
@@ -175,4 +224,100 @@ export const getDashboardService = async (req: AuthenticatedRequest) => {
 
 export const getMetricasService = async () => {
   return { message: "Estas son tus métricas personales" };
+};
+
+/**
+ * Obtener información completa del perfil con estadísticas según el rol
+ */
+export const getPerfilCompletoService = async (req: AuthenticatedRequest) => {
+  const userId = req.user?.id_usuario;
+  const rol = req.user?.rol_global;
+  
+  if (!userId) throw new Error("Usuario no autenticado");
+
+  // Obtener perfil básico
+  const perfil = await prisma.perfil.findUnique({
+    where: { id_usuario: userId },
+    include: {
+      usuario: {
+        select: {
+          id_usuario: true,
+          nombre: true,
+          email: true,
+          rol_global: true,
+          id_rol: true,
+          createdAt: true,
+        },
+      },
+    },
+  });
+
+  const usuario = perfil?.usuario || await prisma.usuario.findUnique({
+    where: { id_usuario: userId },
+    select: {
+      id_usuario: true,
+      nombre: true,
+      email: true,
+      rol_global: true,
+      id_rol: true,
+      createdAt: true,
+    },
+  });
+
+  if (!usuario) throw new Error("Usuario no encontrado");
+
+  // Estadísticas según el rol
+  const estadisticas: any = {};
+
+  if (rol === "ESTUDIANTE") {
+    const inscripciones = await prisma.inscripcion.count({
+      where: {
+        id_usuario: userId,
+        estado: "active",
+      },
+    });
+
+    const promedioProgreso = await prisma.inscripcion.aggregate({
+      where: {
+        id_usuario: userId,
+        estado: "active",
+      },
+      _avg: {
+        progress: true,
+      },
+    });
+
+    estadisticas.cursosInscritos = inscripciones;
+    estadisticas.progresoPromedio = Math.round(promedioProgreso._avg.progress || 0);
+  }
+
+  if (rol === "DOCENTE_EJECUTOR" || rol === "DOCENTE_EDITOR") {
+    const cursosCreados = await prisma.curso.count({
+      where: {
+        id_creador: userId,
+      },
+    });
+
+    const cursosPublicados = await prisma.curso.count({
+      where: {
+        id_creador: userId,
+        publicado: true,
+      },
+    });
+
+    estadisticas.cursosCreados = cursosCreados;
+    estadisticas.cursosPublicados = cursosPublicados;
+  }
+
+  return {
+    perfil: perfil || {
+      id_usuario: userId,
+      avatar_url: null,
+      institucion: null,
+      carrera: null,
+      grupo: null,
+    },
+    usuario,
+    estadisticas,
+  };
 };
