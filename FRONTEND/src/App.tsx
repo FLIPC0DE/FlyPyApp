@@ -22,6 +22,7 @@ import { ToastProvider } from "@heroui/react";
 import EditarPerfilPage from "./pages/usario/editarPerfil";
 import CambiarContraseñaPage from "./pages/usario/cambiarContraseña";
 import RecuperarContraseñaPage from "./pages/auth/recuperarContraseña";
+import { obtenerRolesPermitidos } from "./config/roles.config";
 
 function App() {
   return (
@@ -54,11 +55,7 @@ function App() {
           path="/my-courses"
           element={
             <RutaProtegida
-              rolesPermitidos={[
-                "ESTUDIANTE",
-                "DOCENTE_EJECUTOR",
-                "ADMINISTRADOR",
-              ]}
+              rolesPermitidos={obtenerRolesPermitidos("/my-courses")}
             >
               <MyCoursesPage />
             </RutaProtegida>
@@ -91,7 +88,7 @@ function App() {
         <Route
           path="/progress"
           element={
-            <RutaProtegida rolesPermitidos={["ESTUDIANTE"]}>
+            <RutaProtegida rolesPermitidos={obtenerRolesPermitidos("/progress")}>
               <ProgressPage />
             </RutaProtegida>
           }
@@ -99,7 +96,7 @@ function App() {
         <Route
           path="/checkpoints"
           element={
-            <RutaProtegida rolesPermitidos={["ESTUDIANTE", "DOCENTE_EJECUTOR"]}>
+            <RutaProtegida rolesPermitidos={obtenerRolesPermitidos("/checkpoints")}>
               <CheckpointsPage />
             </RutaProtegida>
           }
@@ -107,9 +104,7 @@ function App() {
         <Route
           path="/analytics"
           element={
-            <RutaProtegida
-              rolesPermitidos={["DOCENTE_EJECUTOR", "ADMINISTRADOR"]}
-            >
+            <RutaProtegida rolesPermitidos={obtenerRolesPermitidos("/analytics")}>
               <AnalyticsPage />
             </RutaProtegida>
           }

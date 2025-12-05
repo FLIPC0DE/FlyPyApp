@@ -7,8 +7,9 @@ import { Button } from "@heroui/button";
 import { Select, SelectItem } from "@heroui/select";
 import { AutenticacionContexto } from "@/context/AutenticacionContexto";
 import { addToast } from "@heroui/react";
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL!;
+import { UsuarioService } from "@/services/usuario.service";
+import { jwtDecode } from "jwt-decode";
+import type { DecodedToken } from "@/context/AutenticacionContexto";
 
 const rolesDisponibles = [
   { label: "Ayudante", value: "ADMIN_AYUDANTE" },
@@ -47,38 +48,26 @@ export default function SeleccionarRolPage() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/api/usuarios/rol`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ rol_global: rolSeleccionado }),
+      // Usar el servicio en lugar de fetch directo
+      const data = await UsuarioService.actualizarRol(rolSeleccionado);
+      
+      addToast({
+        title: "Rol asignado ✅",
+        description: `Tu rol es ahora: ${rolSeleccionado}`,
+        color: "success",
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        addToast({
-          title: "Rol asignado ✅",
-          description: `Tu rol es ahora: ${rolSeleccionado}`,
-          color: "success",
-        });
-        localStorage.setItem("token", data.token);
-        setUser(data.user);
-        navigate("/dashboard");
-      } else {
-        addToast({
-          title: "Error al asignar rol",
-          description: data.error || "Intenta nuevamente.",
-          color: "danger",
-        });
-      }
-    } catch (err) {
+      
+      // Actualizar token y usuario
+      localStorage.setItem("token", data.token);
+      const decoded = jwtDecode<DecodedToken>(data.token);
+      setUser(decoded);
+      
+      navigate("/dashboard");
+    } catch (err: any) {
       console.error("Error al asignar rol:", err);
       addToast({
-        title: "Error de conexión",
-        description: "No se pudo conectar con el servidor.",
+        title: "Error al asignar rol",
+        description: err.message || "No se pudo conectar con el servidor.",
         color: "danger",
       });
     } finally {

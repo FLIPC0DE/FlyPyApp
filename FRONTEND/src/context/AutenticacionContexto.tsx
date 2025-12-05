@@ -64,6 +64,9 @@ interface AutenticacionContextoType {
   user: DecodedToken | null;
   setUser: (user: DecodedToken | null) => void;
   logout: () => void;
+  isLoading: boolean;
+  tieneRol: (rol: string) => boolean;
+  tieneAlgunRol: (roles: string[]) => boolean;
 }
 
 export const AutenticacionContexto = createContext<
@@ -72,13 +75,30 @@ export const AutenticacionContexto = createContext<
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<DecodedToken | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const inicializarUsuario = async () => {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const decoded = jwtDecode<DecodedToken>(token);
-        console.log("🔍 Token decodificado:", decoded); // ✅ Ver qué campos vienen
+        
+        // Validar expiración del token
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          console.warn("⚠️ Token expirado");
+          localStorage.removeItem("token");
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        console.log("🔍 Token decodificado:", decoded);
         setUser(decoded);
 
         const showToast = sessionStorage.getItem("showWelcomeToast");
@@ -93,8 +113,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("❌ Error al decodificar el token:", error);
+        localStorage.removeItem("token");
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    inicializarUsuario();
   }, []);
 
   const logout = () => {
@@ -117,8 +143,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const tieneRol = (rol: string): boolean => {
+    return user?.rol_global === rol;
+  };
+
+  const tieneAlgunRol = (roles: string[]): boolean => {
+    if (!user?.rol_global) return false;
+    return roles.includes(user.rol_global);
+  };
+
   return (
-    <AutenticacionContexto.Provider value={{ user, setUser, logout }}>
+    <AutenticacionContexto.Provider 
+      value={{ 
+        user, 
+        setUser, 
+        logout, 
+        isLoading,
+        tieneRol,
+        tieneAlgunRol,
+      }}
+    >
       {children}
     </AutenticacionContexto.Provider>
   );
