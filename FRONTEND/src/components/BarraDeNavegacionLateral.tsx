@@ -35,6 +35,9 @@ const Sidebar: React.FC = () => {
   
   const { setModuloSeleccionado } = useCurso();
 
+  // Verificar si el usuario es ESTUDIANTE (no puede crear cursos)
+  const esEstudiante = user?.rol_global === "ESTUDIANTE";
+
 
   // Cursos y módulos
   const [cursos, setCursos] = useState<Curso[]>([]);
@@ -267,13 +270,15 @@ const obtenerModulosPorCurso = async (idCurso: number) => {
       <aside className="bg-[#0f172a] text-slate-100 w-90 h-screen flex flex-col border-r border-slate-800 shadow-xl">
         <div className="flex items-center justify-between p-6 text-lg font-semibold tracking-tight border-b border-slate-800">
           <span>Lista de Cursos</span>
-          <button
-            title="Agregar nuevo curso"
-            onClick={() => setShowModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 p-2 rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4 text-white" />
-          </button>
+          {!esEstudiante && (
+            <button
+              title="Agregar nuevo curso"
+              onClick={() => setShowModal(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 p-2 rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4 text-white" />
+            </button>
+          )}
         </div>
 
         <div className="px-6 text-xs uppercase tracking-wide text-slate-500 mt-4 mb-2">

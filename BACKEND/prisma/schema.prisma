@@ -134,6 +134,7 @@ model Perfil {
   avatar_url  String? // Cloudinary URL
   institucion String?
   carrera     String?
+  grupo       String? // Grupo del estudiante o docente
   usuario     Usuario  @relation(fields: [id_usuario], references: [id_usuario])
   updatedAt   DateTime @updatedAt
 }

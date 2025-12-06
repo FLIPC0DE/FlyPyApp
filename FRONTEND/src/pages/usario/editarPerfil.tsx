@@ -13,6 +13,7 @@ export default function EditarPerfilPage() {
     const [perfilExtendido, setPerfilExtendido] = useState({
         institucion: "",
         carrera: "",
+        grupo: "",
     });
     const [nombre, setNombre] = useState(user?.nombre ?? "");
 
@@ -28,6 +29,7 @@ export default function EditarPerfilPage() {
                 setPerfilExtendido({
                     institucion: data?.institucion ?? "",
                     carrera: data?.carrera ?? "",
+                    grupo: data?.grupo ?? "",
                 });
                 setLoading(false);
             })
@@ -116,9 +118,9 @@ export default function EditarPerfilPage() {
                     </Select>
                     <Select
                         label="Carrera"
-                        selectedKeys={[perfilExtendido.carrera]}
+                        selectedKeys={perfilExtendido.carrera ? [perfilExtendido.carrera] : []}
                         onSelectionChange={(keys) => {
-                            const selected = String(Array.from(keys)[0]);
+                            const selected = String(Array.from(keys)[0] || "");
                             setPerfilExtendido((prev) => ({
                                 ...prev,
                                 carrera: selected,
@@ -132,7 +134,19 @@ export default function EditarPerfilPage() {
                             Ingeniería en Informática
                         </SelectItem>
                     </Select>
-                    <Button color="primary" onClick={handleGuardar}>
+                    <Input
+                        label="Grupo"
+                        placeholder="Ej: A, B, 1, 2, etc."
+                        value={perfilExtendido.grupo}
+                        onValueChange={(value) => {
+                            setPerfilExtendido((prev) => ({
+                                ...prev,
+                                grupo: value,
+                            }));
+                        }}
+                        description="Grupo al que perteneces (estudiante o docente)"
+                    />
+                    <Button color="primary" onClick={handleGuardar} isLoading={loading}>
                         Guardar cambios
                     </Button>
                 </CardBody>

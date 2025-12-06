@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/authenticate.middleware";
 import { requireGlobalRol, requireRol } from "../middlewares/requireRol.middleware";
-import { getDashboard, getMetricas, getPerfil, getUsuarios, updatePassword, updatePerfil, updateRol } from "../controllers/usuario.controller";
+import { getDashboard, getMetricas, getPerfil, getPerfilCompleto, getUsuarios, updatePassword, updatePerfil, updateRol } from "../controllers/usuario.controller";
 
 
 const router = Router();
@@ -67,6 +67,15 @@ router.get("/metricas", authenticate, async (req, res) => {
   } catch (err: any) {
     console.error("❌ Error en GET /metricas:", err.message);
     res.status(500).json({ error: "Error interno al obtener métricas" });
+  }
+});
+
+router.get("/perfil-completo", authenticate, async (req, res) => {
+  try {
+    await getPerfilCompleto(req, res);
+  } catch (err: any) {
+    console.error("❌ Error en GET /perfil-completo:", err.message);
+    res.status(500).json({ error: "Error interno al obtener perfil completo" });
   }
 });
 

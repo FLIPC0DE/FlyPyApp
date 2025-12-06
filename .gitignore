@@ -1,0 +1,5 @@
+# Ignorar carpetas de dependencias en cualquier parte del proyecto
+**/node_modules/
+
+# Ignorar archivos temporales o de compilación (opcional pero recomendado)
+*.log

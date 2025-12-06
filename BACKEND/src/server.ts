@@ -11,6 +11,7 @@ import registrarComentarioRouter from "./routes/comentario.routes";
 import registrarModuloRouter from "./routes/modulo.routes";
 import registrarTopicoRouter from "./routes/topico.routes";
 import contenidoRouter from "./routes/contenido.routes";
+import inscripcionRouter from "./routes/inscripcion.routes";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/comentarios", registrarComentarioRouter);
 app.use("/api/modulos", registrarModuloRouter);
 app.use("/api/topicos", registrarTopicoRouter);
 app.use("/api/contenidos", contenidoRouter);
+app.use("/api/inscripciones", inscripcionRouter);
 
 
 app.use(express.json()); 
