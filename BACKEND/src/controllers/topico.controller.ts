@@ -26,32 +26,61 @@ export const crearTopico = async (req: Request, res: Response) => {
     id_curso,
   } = req.body;
 
-  // Validaciones
+  // Validaciones básicas
   if (!titulo || !tipo || !id_modulo || !id_curso) {
-    return res.status(400).json({ error: "Faltan datos obligatorios" });
+    return res.status(400).json({
+      success: false,
+      error: "Faltan datos obligatorios.",
+    });
   }
 
   if (!TIPOS_VALIDOS.includes(tipo)) {
-    return res.status(400).json({ error: `Tipo inválido. Valores permitidos: ${TIPOS_VALIDOS.join(", ")}` });
+    return res.status(400).json({
+      success: false,
+      error: `Tipo inválido. Valores permitidos: ${TIPOS_VALIDOS.join(", ")}`,
+    });
   }
 
   try {
+    // Buscar curso
+    const curso = await prisma.curso.findUnique({
+      where: { id_curso: Number(id_curso) },
+    });
+
+    if (!curso) {
+      return res.status(400).json({
+        success: false,
+        error: "Curso no encontrado.",
+      });
+    }
+
+    // No validamos fechas, solo convertimos o guardamos null
+    const disponibleDesde =
+      disponible_desde ? new Date(disponible_desde) : null;
+
+    const disponibleHasta =
+      disponible_hasta ? new Date(disponible_hasta) : null;
+
+    // Crear tópico
     const topico = await prisma.topico.create({
       data: {
         titulo,
         descripcion: descripcion || null,
         tipo,
-        disponibleDesde: disponible_desde ? new Date(disponible_desde) : null,
-        disponibleHasta: disponible_hasta ? new Date(disponible_hasta) : null,
-        id_modulo: parseInt(id_modulo),
-        id_curso: parseInt(id_curso),
+        disponibleDesde,
+        disponibleHasta,
+        id_modulo: Number(id_modulo),
+        id_curso: Number(id_curso),
       },
     });
 
-    return res.status(201).json(topico);
+    return res.status(201).json({ success: true, data: topico });
   } catch (error) {
     console.error("Error al crear tópico:", error);
-    return res.status(500).json({ error: "Error al crear tópico" });
+    return res.status(500).json({
+      success: false,
+      error: "Error al crear tópico.",
+    });
   }
 };
 
@@ -73,3 +102,75 @@ export const listarTopicosPorModulo = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Error al obtener tópicos" });
   }
 };
+
+export const eliminarTopico = async (req: Request, res: Response) => {
+  const { idTopico } = req.params;
+
+  if (!idTopico) {
+    return res.status(400).json({ error: "Falta el id del topico" });
+  }
+
+  try {
+    const id = parseInt(idTopico);
+
+    // 1️⃣ Eliminar todos los contenidos asociados al tópico
+    await prisma.contenido.deleteMany({
+      where: { id_topico: id }
+    });
+
+    // 2️⃣ Eliminar el tópico
+    const eliminado = await prisma.topico.delete({
+      where: { id_topico: id }
+    });
+
+    return res.json({
+      ok: true,
+      mensaje: "Tópico y contenidos eliminados correctamente",
+      topicoEliminado: eliminado
+    });
+
+  } catch (error) {
+    console.error("Error al eliminar tópico:", error);
+    return res.status(500).json({ error: "Error al eliminar tópico" });
+  }
+};
+
+export const editarTopico = async (req: Request, res: Response) => {
+  const { idTopico } = req.params;
+  const {
+    titulo,
+    descripcion,
+    disponible_desde,
+    disponible_hasta,
+  } = req.body;
+
+  if (!idTopico) {
+    return res.status(400).json({ error: "Falta el id del tópico" });
+  }
+
+
+  try {
+    const id = parseInt(idTopico);
+
+    const actualizado = await prisma.topico.update({
+      where: { id_topico: id },
+      data: {
+        titulo,
+        descripcion,
+        disponibleDesde: disponible_desde ? new Date(disponible_desde) : null,
+        disponibleHasta: disponible_hasta ? new Date(disponible_hasta) : null,
+      },
+    });
+
+    return res.json({
+      ok: true,
+      mensaje: "Tópico actualizado correctamente",
+      topicoActualizado: actualizado
+    });
+
+  } catch (error) {
+    console.error("Error al editar tópico:", error);
+    return res.status(500).json({ error: "Error al editar tópico" });
+  }
+}
+

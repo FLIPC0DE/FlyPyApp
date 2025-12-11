@@ -9,7 +9,7 @@ router.post('/agregarContenido', uploadMiddleware, agregarContenido);
 
 export default router;**/
 import { Router } from "express";
-import { agregarContenido } from "../controllers/contenido.controller";
+import { agregarContenido, obtenerContenidosPorTopico, editarContenido, eliminarContenido } from "../controllers/contenido.controller";
 import { uploadCloud } from "../middlewares/cloudinaryUpload"; 
 // Asegúrate de que 'uploadCloud' sea la instancia de Multer que usa Cloudinary
 
@@ -20,18 +20,20 @@ const router = Router();
 // puede tener múltiples archivos (maxCount: 100).
 // Extendemos esto para los primeros 10 bloques.
 
-const MAX_BLOCKS_TO_HANDLE = 10;
+const MAX_BLOCKS_TO_HANDLE = 20; // o el número máximo de bloques que esperas
 const fieldsToUpload = Array.from({ length: MAX_BLOCKS_TO_HANDLE }, (_, i) => ({
     name: `blocks[${i}][file]`,
-    maxCount: 100, // Permite hasta 100 archivos por bloque (imagen, video, etc.)
+    maxCount: 100,
 }));
 
 
 router.post(
   "/agregarContenido",
-  // 🛑 USAR uploadCloud.fields() con el array de campos
-  uploadCloud.fields(fieldsToUpload), 
+  uploadCloud.any(), // <- permite cualquier campo de archivo
   agregarContenido
 );
+router.get("/obtenerContenidoPorTopico/:id_topico", obtenerContenidosPorTopico);
+router.put("/editarContenidoPorTopico/:id", uploadCloud.any(), editarContenido);
+router.delete("/eliminarContenido/:id_contenido", eliminarContenido);
 
 export default router;
