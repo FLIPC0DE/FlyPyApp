@@ -19,15 +19,8 @@ interface Modulo {
 }
 
 const Sidebar: React.FC = () => {
-    const TIPOS_VALIDOS = [
-    "TEXTO_IMAGEN",
-    "TEXTO_VIDEO",
-    "TEXTO_SLIDES",
-    "TEXTO_AUDIO",
-    "PLAYGROUND",
-    "VIDEO_PLAYGROUND",
-    "IMAGE_PLAYGROUND"
-  ];
+    
+  
 
 
   const { user } = useContext(AutenticacionContexto)!;
@@ -351,7 +344,7 @@ const eliminarModulo = async (modulo: Modulo) => {
         method: "DELETE",
     
       });
-      const data = await res.json();
+      //const data = await res.json();
       if (res.ok) {
         alert("Módulo eliminado correctamente.");
         // Refrescar módulos del curso

@@ -1,15 +1,15 @@
 import { useContext, useState, useEffect, useRef } from "react";
-import { jwtDecode } from "jwt-decode";
+//import { jwtDecode } from "jwt-decode";
 import { AutenticacionContexto } from "../context/AutenticacionContexto";
 
 // 👇 Tipo para los datos que esperas del token JWT
-interface DecodedToken {
-  //id: number;
-  email: string;
-  nombre: string;
-  id_rol: number;
-  //exp?: number;
-}
+// interface DecodedToken {
+//   //id: number;
+//   email: string;
+//   nombre: string;
+//   id_rol: number;
+//   //exp?: number;
+// }
 
 function MenuUsuario() {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ function MenuUsuario() {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded = jwtDecode<DecodedToken>(token);
+        //const decoded = jwtDecode<DecodedToken>(token);
         //setUser(decoded);
       } catch (error) {
         console.error("Error al decodificar el token:", error);

@@ -7,7 +7,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { useState, useEffect } from "react";
-import { BookOpen, Calendar, Users, Edit, User, ArrowRight, X } from "lucide-react";
+import { BookOpen, Calendar, Edit, User, ArrowRight, X } from "lucide-react";
 import { addToast } from "@heroui/react";
 import { InscripcionService } from "@/services/inscripcion.service";
 import { useNavigate } from "react-router-dom";
@@ -23,11 +23,11 @@ interface Curso {
 }
 
 export default function MyCoursesPage() {
-  const { user, tieneRol } = useAuth();
+  const { tieneRol } = useAuth();
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarConstructor, setMostrarConstructor] = useState(false);
-  const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(null);
+  //const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(null);
 
   // Cargar cursos del docente ejecutor
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function MyCoursesPage() {
               variant="light"
               onClick={() => {
                 setMostrarConstructor(false);
-                setCursoSeleccionado(null);
+                //setCursoSeleccionado(null);
               }}
             >
               ← Volver a Mis Cursos
@@ -152,7 +152,7 @@ export default function MyCoursesPage() {
                             size="sm"
                             className="w-full"
                             onClick={() => {
-                              setCursoSeleccionado(curso);
+                              //setCursoSeleccionado(curso);
                               setMostrarConstructor(true);
                             }}
                             startContent={<Edit className="w-4 h-4" />}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCurso } from "@/context/CursoContexto";
 
 type BlockType = "text" | "image" | "video" | "audio" | "slides" | "playground";

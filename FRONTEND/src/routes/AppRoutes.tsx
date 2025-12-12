@@ -1,8 +1,8 @@
-import { Routes, Route } from "react-router-dom";
-import BarrasDeNavegacion from "../components/BarrasDeNavegacion";
-import  PaginaCrearCurso from "../pages/PaginaCrearCurso";
-import  PaginaDeRegistro from "../pages/PaginaDeRegistro";
-import  PaginaIniciarSesion from "../pages/PaginaIniciarSesion";
+// import { Routes, Route } from "react-router-dom";
+// import BarrasDeNavegacion from "../components/BarrasDeNavegacion";
+// import  PaginaCrearCurso from "../pages/PaginaCrearCurso";
+// import  PaginaDeRegistro from "../pages/PaginaDeRegistro";
+// import  PaginaIniciarSesion from "../pages/PaginaIniciarSesion";
 import App from "../App";
 
 
