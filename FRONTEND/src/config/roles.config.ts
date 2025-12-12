@@ -99,6 +99,8 @@ export function tienePermiso(rol: RolTipo | undefined, permiso: keyof typeof PER
  * Helper para obtener roles permitidos para una ruta
  */
 export function obtenerRolesPermitidos(ruta: keyof typeof RUTAS_POR_ROL): RolTipo[] {
-  return RUTAS_POR_ROL[ruta] || [];
+  // `RUTAS_POR_ROL` está declarado con `as const` por lo que sus arreglos son `readonly`.
+  // Retornamos una copia mutable para evitar errores al asignarlo a `RolTipo[]` en call-sites.
+  return [...(RUTAS_POR_ROL[ruta] ?? [])] as RolTipo[];
 }
 

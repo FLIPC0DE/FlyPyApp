@@ -1,273 +1,458 @@
-import React, { useState } from "react";
-import { useContext } from "react";
-// Asegúrate de que esta importación sea correcta
-import { useCurso } from "@/context/CursoContexto"; 
+import { useState, useEffect } from "react";
+import { useCurso } from "@/context/CursoContexto";
 
 type BlockType = "text" | "image" | "video" | "audio" | "slides" | "playground";
 
 interface ContentBlock {
   id: string;
+  id_contenido?: number;
+  isNew: boolean;
+  isEdited: boolean;
   type: BlockType;
-  content: string; 
-  files: File[] | null; 
-  title: string; 
+  title: string;
+  content: string;
+  output?: string;
+  files: File[] | null;
+  mediaUrls: string[];
+  mediaUrlsToRemove?: string[]; // <-- Aquí la agregamos
 }
+
 
 export default function ContentBuilder(): JSX.Element {
   const { topicoSeleccionado } = useCurso();
-  
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [pyodide, setPyodide] = useState<any>(null);
 
+  useEffect(() => {
+    const load = async () => {
+      if (!pyodide) {
+        const instance = await (window as any).loadPyodide();
+        setPyodide(instance);
+      }
+    };
+    load();
+  }, []);
+
+  // Cargar bloques existentes (igual)
+  const cargarContenido = async () => {
+  if (!topicoSeleccionado) {
+    setContentBlocks([]);
+    return;
+  }
+
+  try {
+    const resp = await fetch(
+      `http://localhost:3000/api/contenidos/obtenerContenidoPorTopico/${topicoSeleccionado}`
+    );
+
+    const data = await resp.json();
+    if (!data.ok) return;
+
+    const bloques = data.data.map((b: any) => ({
+      id: crypto.randomUUID(),
+      id_contenido: b.id,
+      isNew: false,
+      isEdited: false,
+      type: b.type,
+      title: b.title || "",
+      content: b.content || "",
+      files: null,
+      mediaUrls: b.media
+        ? Array.isArray(b.media)
+          ? b.media
+          : JSON.parse(b.media)
+        : [],
+    }));
+
+    setContentBlocks(bloques);
+  } catch (err) {
+    console.error("Error cargando contenido:", err);
+  }
+};
+
+// 2️⃣ useEffect solo llama a la función
+useEffect(() => {
+  cargarContenido();
+}, [topicoSeleccionado]);
+  // ──────────────────────────────────────────────────────────────
+  // Helpers
+  // ──────────────────────────────────────────────────────────────
   const addBlock = (type: BlockType) => {
     const newBlock: ContentBlock = {
       id: crypto.randomUUID(),
+      isNew: true,
+      isEdited: false,
       type,
+      title: "",
       content: "",
-      files: null, // Inicializar con null
-      title: "", 
+      files: null,
+      mediaUrls: [],
     };
-    setContentBlocks((prev) => [...prev, newBlock]);
+    setContentBlocks(prev => [...prev, newBlock]);
   };
+
+  const markEditedIfNeeded = (block: ContentBlock, changes: Partial<ContentBlock>) =>
+    !block.isNew ? { ...changes, isEdited: true } : changes;
 
   const updateBlock = (id: string, changes: Partial<ContentBlock>) => {
-    // Estructura de inmutabilidad correcta y revisada
-    setContentBlocks((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...changes } : b))
+    setContentBlocks(prev =>
+      prev.map(b => (b.id === id ? { ...b, ...markEditedIfNeeded(b, changes) } : b))
     );
   };
 
-  const removeBlock = (id: string) => {
-    setContentBlocks((prev) => prev.filter((b) => b.id !== id));
-  };
+  const removeBlockLocal = (id: string) =>
+    setContentBlocks(prev => prev.filter(b => b.id !== id));
 
-  // 🛑 NUEVA FUNCIÓN: Eliminar un archivo específico de un bloque
-  const removeFileFromBlock = (blockId: string, fileIndexToRemove: number) => {
-    setContentBlocks((prev) =>
-      prev.map((block) => {
-        if (block.id === blockId && block.files) {
-          // Crear un nuevo array de archivos sin el archivo en el índice especificado
-          const updatedFiles = block.files.filter((_, idx) => idx !== fileIndexToRemove);
-          // Si no quedan archivos, establecer 'files' en null
-          return { ...block, files: updatedFiles.length > 0 ? updatedFiles : null };
-        }
-        return block;
-      })
-    );
-  };
+  const removeBlock = async (id: string) => {
+    const block = contentBlocks.find(b => b.id === id);
+    if (!block) return;
 
-const guardarContenido = async () => {
-  if (!topicoSeleccionado) {
-    return alert("Selecciona un tópico primero.");
-  }
+    if (block.id_contenido) {
+      if (!confirm("Eliminar este contenido y sus archivos permanentemente?")) return;
 
-  const formData = new FormData();
-  formData.append("id_topico", topicoSeleccionado.toString());
-
-  contentBlocks.forEach((block, index) => {
-    formData.append(`blocks[${index}][title]`, block.title); 
-    formData.append(`blocks[${index}][type]`, block.type);
-    formData.append(`blocks[${index}][content]`, block.content);
-
-    // Enviar MÚLTIPLES ARCHIVOS: Iterar sobre 'files'
-    if (block.files && block.files.length > 0) {
-        block.files.forEach((file) => {
-             // Usar el campo blocks[i][file] para que Multer lo capture
-             formData.append(`blocks[${index}][file]`, file); 
-        });
+      try {
+        const resp = await fetch(`http://localhost:3000/api/contenidos/eliminarContenido/${block.id_contenido}`, { method: "DELETE" });
+        const result = await resp.json();
+        if (resp.ok) removeBlockLocal(id);
+        else alert(result.mensaje || "Error eliminando contenido");
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al eliminar contenido");
+      }
+    } else {
+      removeBlockLocal(id);
     }
-  });
+  };
 
-  try {
-    const response = await fetch("http://localhost:3000/api/contenidos/agregarContenido", {
-      method: "POST",
-      body: formData,
+const removeFileFromBlock = (blockId: string, index: number) => {
+  setContentBlocks(prev =>
+    prev.map(block => {
+      if (block.id === blockId) {
+        // Si es un archivo local
+        if (block.files && index < (block.files?.length || 0)) {
+          const updatedFiles = block.files.filter((_, i) => i !== index);
+          return { ...block, files: updatedFiles.length ? updatedFiles : null, ...(block.isNew ? {} : { isEdited: true }) };
+        }
+
+        // Si es un archivo existente (Cloudinary)
+        if (block.mediaUrls && index < (block.mediaUrls?.length || 0)) {
+          const removedUrl = block.mediaUrls[index];
+          const updatedMedia = block.mediaUrls.filter((_, i) => i !== index);
+
+          const updatedRemoveList = block.mediaUrlsToRemove
+            ? [...block.mediaUrlsToRemove, removedUrl]
+            : [removedUrl];
+
+          return { ...block, mediaUrls: updatedMedia, mediaUrlsToRemove: updatedRemoveList, isEdited: true };
+        }
+      }
+      return block;
+    })
+  );
+};
+
+
+  // ──────────────────────────────────────────────────────────────
+  // Guardar contenido (nuevos + editados)
+  // ──────────────────────────────────────────────────────────────
+  const guardarContenido = async () => {
+  if (!topicoSeleccionado) return alert("Selecciona un tópico primero.");
+
+  const nuevos = contentBlocks.filter(b => b.isNew);
+  const editados = contentBlocks.filter(b => !b.isNew && b.isEdited);
+
+  // ── Guardar bloques nuevos ──
+  if (nuevos.length > 0) {
+    const formData = new FormData();
+    formData.append("id_topico", String(topicoSeleccionado));
+
+    nuevos.forEach((b, idx) => {
+      formData.append(`blocks[${idx}][type]`, b.type);
+      formData.append(`blocks[${idx}][title]`, b.title);
+      formData.append(`blocks[${idx}][content]`, b.content);
+
+      if (b.files) {
+        b.files.forEach(f => {
+          formData.append(`blocks[${idx}][file]`, f); // coincidir con backend
+        });
+      }
     });
 
-    const result = await response.json();
+    try {
+      const resp = await fetch(`http://localhost:3000/api/contenidos/agregarContenido`, {
+        method: "POST",
+        body: formData,
+      });
+      const result = await resp.json();
+      if (!resp.ok) return alert(result.mensaje || "Error al guardar nuevos bloques");
 
-    if (response.ok) {
-        alert("Contenido guardado exitosamente!");
-    } else {
-        alert(`Error al guardar: ${result.mensaje || 'Error desconocido'}`);
-        console.error("Backend Error:", result.error);
+      // Actualizar estado local
+      setContentBlocks(prev =>
+        prev.map(p => {
+          const nuevo = result.data?.find((d: any) => d.tempId === p.id); // opcional, si envías tempId
+          if (p.isNew && nuevo) {
+            return {
+              ...p,
+              isNew: false,
+              isEdited: false,
+              id_contenido: nuevo.id,
+              mediaUrls: nuevo.media ?? [],
+              files: null,
+            };
+          }
+          return p;
+        })
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión al guardar nuevos bloques");
     }
-  } catch (error) {
-      console.error("Fetch Error:", error);
-      alert("Error de conexión con el servidor.");
+  }
+
+  // ── Guardar bloques editados ──
+  for (const b of editados) {
+    if (!b.id_contenido) continue;
+
+    const formData = new FormData();
+    formData.append("type", b.type);
+    formData.append("title", b.title);
+    formData.append("content", b.content);
+
+    if (b.mediaUrls?.length) formData.append("existingMedia", JSON.stringify(b.mediaUrls));
+    if (b.mediaUrlsToRemove?.length) formData.append("mediaUrlsToRemove", JSON.stringify(b.mediaUrlsToRemove));
+    if (b.files?.length) b.files.forEach(file => formData.append(`blocks[0][file]`, file));
+
+    try {
+      const resp = await fetch(`http://localhost:3000/api/contenidos/editarContenidoPorTopico/${b.id_contenido}`, {
+        method: "PUT",
+        body: formData,
+      });
+      const result = await resp.json();
+      if (!resp.ok) return alert(result.mensaje || "Error al actualizar bloque");
+
+      setContentBlocks(prev =>
+        prev.map(p =>
+          p.id_contenido === b.id_contenido
+            ? { ...p, isEdited: false, files: null, mediaUrls: result.data?.media ?? p.mediaUrls }
+            : p
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión al actualizar bloque");
+    }
+  }
+  alert("Guardado finalizado!");
+  cargarContenido();
+};
+
+const runPython = async (code: string, setOutput: (msg: string) => void) => {
+  if (!pyodide) {
+    setOutput("⏳ Cargando Pyodide...");
+    return;
+  }
+
+  try {
+    let output = "";
+
+    // Redirige stdout y stderr de Pyodide
+    pyodide.setStdout({
+      batched: (text: string) => {
+        output += text;
+      }
+    });
+    pyodide.setStderr({
+      batched: (text: string) => {
+        output += "Error: " + text;
+      }
+    });
+
+    // Ejecuta el código Python
+    const result = await pyodide.runPythonAsync(code);
+
+    // Si la última expresión tiene resultado, lo agregamos
+    if (result !== undefined && result !== null) {
+      output += result.toString();
+    }
+
+    // Guardar la salida en el estado del bloque
+    setOutput(output);
+
+    // Limpiar redirecciones
+    pyodide.setStdout({});
+    pyodide.setStderr({});
+  } catch (err: any) {
+    setOutput("❌ Error:\n" + err.toString());
   }
 };
 
 
+
+  // ──────────────────────────────────────────────────────────────
+  // Render
+  // ──────────────────────────────────────────────────────────────
   return (
-    
     <div className="min-h-screen p-10 bg-slate-900 text-slate-100">
       <h1 className="text-3xl font-semibold mb-6">Contenido</h1>
+
       <button
-          onClick={guardarContenido}
-          className="mb-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold transition duration-150"
-        >
-          💾 Guardar contenido en Tópico
-        </button>
-        
-      {/* TOOLBAR (sin cambios) */}
+        onClick={guardarContenido}
+        className="mb-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold transition duration-150 cursor-pointer"
+      >
+        💾 Guardar contenido
+      </button>
+
+      {/* Toolbar */}
       <div className="flex flex-wrap gap-3 border-b border-slate-700 pb-4 mb-6">
-        <button onClick={() => addBlock("text")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">➕ Texto</button>
-        <button onClick={() => addBlock("image")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">🖼 Imagen</button>
-        <button onClick={() => addBlock("video")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">🎥 Video</button>
-        <button onClick={() => addBlock("audio")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">🎧 Audio</button>
-        <button onClick={() => addBlock("slides")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">📑 Slides</button>
-        <button onClick={() => addBlock("playground")} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150">🐍 Playground</button>
+        {["text","image","video","audio","slides","playground"].map(type => (
+          <button
+            key={type}
+            onClick={() => addBlock(type as BlockType)}
+            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer"
+          >
+            {type === "text" ? "➕ Texto" :
+             type === "image" ? "🖼 Imagen" :
+             type === "video" ? "🎥 Video" :
+             type === "audio" ? "🎧 Audio" :
+             type === "slides" ? "📑 Slides" : "🐍 Playground"}
+          </button>
+        ))}
       </div>
 
-      {/* LISTA DE BLOQUES */}
-      <div className="space-y-4">
-        {contentBlocks.map((block) => {
-          
-          // Helper para el display de archivos
-          const fileCount = block.files ? block.files.length : 0;
-          const fileNameDisplay = fileCount > 0 
-            ? `${fileCount} archivo(s) seleccionado(s)`
-            : `📁 Seleccionar ${block.type}`;
-
+      {/* Bloques */}
+      <div className="space-y-6">
+        {contentBlocks.map(block => {
+          const fileCount = (block.files?.length || 0) + (block.mediaUrls?.length || 0);
           return (
-          <div
-            key={block.id}
-            className="bg-slate-800 border border-slate-700 rounded-lg p-5 shadow-lg"
-          >
-            {/* HEADER DEL BLOQUE */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-xl font-semibold capitalize">
-                Bloque: **{block.type}**
-              </span>
-
-              <button
-                onClick={() => removeBlock(block.id)}
-                className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded-lg text-sm font-bold transition duration-150"
-              >
-                ✖ Eliminar
-              </button>
-            </div>
-            
-            {/* CAMPO DE TÍTULO */}
-            <div className="mb-4">
-                <label htmlFor={`title-${block.id}`} className="block text-sm font-medium text-slate-400 mb-1">
-                    Título del Bloque
-                </label>
-                <input
-                    id={`title-${block.id}`}
-                    type="text"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-md p-2 text-lg font-semibold placeholder-slate-500"
-                    placeholder={`Escribe el título para el contenido de tipo ${block.type}`}
-                    value={block.title} 
-                    onChange={(e) => updateBlock(block.id, { title: e.target.value })}
-                />
-            </div>
-
-            {/* CONTENIDO DEL BLOQUE */}
-            
-            {/* TEXT */}
-            {block.type === "text" && (
-              <textarea
-                className="w-full bg-slate-900 border border-slate-700 rounded-md p-3 h-32"
-                placeholder="Escribe tu texto..."
-                value={block.content}
-                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-              />
-            )}
-            
-            {/* Bloques MULTIMEDIA */}
-            {(block.type === "image" || block.type === "video" || block.type === "audio" || block.type === "slides") && (
-                <div className="space-y-4">
-                    {/* Botón de subida de archivo */}
-                    <div className="p-3 border border-slate-700 rounded-md">
-                        <label 
-                            htmlFor={`file-upload-${block.id}`}
-                            className="inline-block px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg cursor-pointer transition duration-150"
-                        >
-                            {fileNameDisplay}
-                        </label>
-                        <input
-                            id={`file-upload-${block.id}`}
-                            type="file"
-                            accept={block.type === 'image' ? 'image/*' : block.type === 'video' ? 'video/*' : block.type === 'audio' ? 'audio/*' : '.pdf,.ppt,.pptx'}
-                            multiple={block.type === 'image'} // Solo 'multiple' para imágenes
-                            className="hidden"
-                            onChange={(e) => {
-                                const selectedFiles = Array.from(e.target.files || []);
-                                const existingFiles = block.files || [];
-
-                                let newFiles: File[] | null;
-                                
-                                if (block.type === 'image') {
-                                    newFiles = [...existingFiles, ...selectedFiles];
-                                } else {
-                                    // Para otros tipos, se reemplaza el archivo
-                                    newFiles = selectedFiles.length > 0 ? [selectedFiles[0]] : null;
-                                }
-
-                                updateBlock(block.id, { files: newFiles }); 
-                                e.target.value = ''; // Limpiar el input para permitir subir el mismo archivo de nuevo
-                            }}
-                        />
-                        
-                        {/* PREVISUALIZACIÓN Y BOTÓN DE ELIMINAR (Solo para IMAGEN) */}
-                        {block.type === 'image' && block.files && block.files.length > 0 && (
-                            <div className="mt-4 flex flex-wrap gap-3">
-                                {block.files.map((file, idx) => (
-                                    <div key={idx} className="relative group">
-                                        <img 
-                                            src={URL.createObjectURL(file)} 
-                                            className="max-h-24 w-auto rounded-md object-cover border border-slate-600" 
-                                            alt={`Preview ${idx + 1}`} 
-                                        />
-                                        {/* 🛑 BOTÓN DE ELIMINAR */}
-                                        <button
-                                            onClick={() => removeFileFromBlock(block.id, idx)}
-                                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                                            title="Eliminar imagen"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* PREVISUALIZACIÓN ÚNICA (Video, Audio, Slides) */}
-                        {block.type !== 'image' && block.files && block.files.length > 0 && (
-                            <div className="mt-4">
-                                {block.type === "video" && (<video controls className="max-h-60 rounded-md" src={URL.createObjectURL(block.files[0])} />)}
-                                {block.type === "audio" && (<audio controls src={URL.createObjectURL(block.files[0])} className="w-full" />)}
-                                {block.type === "slides" && (<p className="text-slate-300">Archivo cargado: **{block.files[0].name}**</p>)}
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* Textarea de descripción (Cuerpo) */}
-                    <div>
-                        <h3 className="text-lg font-semibold mb-2">Cuerpo / Descripción</h3>
-                        <textarea
-                            className="w-full bg-slate-900 border border-slate-700 rounded-md p-3 h-24"
-                            placeholder={`Escribe la descripción o cuerpo para este ${block.type}...`}
-                            value={block.content}
-                            onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-                        />
-                    </div>
+            <div key={block.id} className="bg-slate-800 border border-slate-700 rounded-lg p-5 shadow-lg">
+              <div className="flex justify-between mb-3 items-center">
+                <div>
+                  <span className="text-xl font-semibold mr-3">Bloque: {block.type}</span>
+                  {block.isNew && <span className="text-xs bg-emerald-600 px-2 py-1 rounded ml-2">Nuevo</span>}
+                  {!block.isNew && block.isEdited && <span className="text-xs bg-yellow-500 px-2 py-1 rounded ml-2">Editado</span>}
                 </div>
-            )}
+                <button onClick={() => removeBlock(block.id)} className="bg-red-600 px-3 py-1 rounded cursor-pointer">✖ Eliminar</button>
+              </div>
 
-            {/* PLAYGROUND */}
-            {block.type === "playground" && (
-              <textarea
-                className="w-full bg-slate-900 border border-slate-700 rounded-md p-3 font-mono h-40"
-                placeholder="Escribe tu código Python..."
-                value={block.content}
-                onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+              <input
+                type="text"
+                value={block.title}
+                placeholder="Título"
+                className="w-full bg-slate-900 border border-slate-700 p-2 rounded mb-4"
+                onChange={e => updateBlock(block.id, { title: e.target.value })}
               />
-            )}
-          </div>
-        )})}
+
+              {block.type === "text" && (
+                <textarea
+                  className="w-full bg-slate-900 border border-slate-700 rounded p-3 h-32"
+                  value={block.content}
+                  placeholder="Texto..."
+                  onChange={e => updateBlock(block.id, { content: e.target.value })}
+                />
+              )}
+
+              {(block.type === "image" || block.type === "video" || block.type === "audio" || block.type === "slides") && (
+                <>
+                  <label className="inline-block mb-3 px-4 py-2 bg-slate-700 rounded cursor-pointer">
+                    📁 {fileCount} archivo(s)
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept={
+                        block.type === "image"
+                          ? "image/*"
+                          : block.type === "video"
+                          ? "video/*"
+                          : block.type === "audio"
+                          ? "audio/*"
+                          : ".pdf,.ppt,.pptx"
+                      }
+                      multiple
+                      onChange={e => {
+                        const selected = Array.from(e.target.files || []);
+                        const existingFiles = block.files || [];
+                        updateBlock(block.id, { files: [...existingFiles, ...selected] });
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+
+                  {/* Preview mediaUrls */}
+                  {block.mediaUrls?.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-3">
+                      {block.mediaUrls.map((url, idx) => (
+                        <div key={idx} className="relative group">
+                          {block.type === "image" && <img src={url} className="h-28 rounded border" />}
+                          {block.type === "video" && <video controls className="h-40 rounded" src={url} />}
+                          {block.type === "audio" && <audio controls src={url} />}
+                          {block.type === "slides" && <a href={url} target="_blank" className="underline text-blue-300">{url.split("/").pop()}</a>}
+                          <button onClick={() => removeFileFromBlock(block.id, idx)} className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 transform hover:scale-110">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Preview archivos locales */}
+                  {block.files?.length! > 0 && (
+                    <div className="flex flex-wrap gap-3 mb-3">
+                      {block.files?.map((file, idx) => (
+                        <div key={idx} className="relative group">
+                          {block.type === "image" && <img src={URL.createObjectURL(file)} className="h-28 rounded border" />}
+                          {block.type === "video" && <video controls className="h-40 rounded" src={URL.createObjectURL(file)} />}
+                          {block.type === "audio" && <audio controls src={URL.createObjectURL(file)} />}
+                          {block.type === "slides" && <p className="text-slate-300">{file.name}</p>}
+                          <button onClick={() => removeFileFromBlock(block.id, idx)} className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 transform hover:scale-110">✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <textarea
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 h-24"
+                    value={block.content}
+                    placeholder="Descripción..."
+                    onChange={e => updateBlock(block.id, { content: e.target.value })}
+                  />
+                </>
+              )}
+
+              {block.type === "playground" && (
+                <div className="space-y-3">
+                  <label className="font-semibold text-lg">🐍 Python Playground</label>
+
+                  {/* Editor */}
+                  <textarea
+                    className="w-full bg-slate-900 border border-slate-700 rounded p-3 h-40 font-mono"
+                    value={block.content}
+                    placeholder={`print("Hola Python!")`}
+                    onChange={e => updateBlock(block.id, { content: e.target.value })}
+                  />
+
+                  {/* Botón ejecutar */}
+                  <button
+                    onClick={() =>
+                      runPython(block.content, msg =>
+                        updateBlock(block.id, { output: msg }) // ahora msg es un string
+                      )
+                    }
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-md font-bold"
+                  >
+                    ▶ Ejecutar
+                  </button>
+
+                  {/* Consola */}
+                  <pre className="bg-black text-green-300 p-3 rounded h-32 overflow-auto whitespace-pre-wrap">
+                    {block.output || "Salida..."}
+                  </pre>
+                </div>
+              )}
+
+            </div>
+          );
+        })}
       </div>
     </div>
   );
+
 }
+
