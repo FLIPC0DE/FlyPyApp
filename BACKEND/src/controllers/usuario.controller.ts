@@ -7,6 +7,7 @@ import {
   getMetricasService,
   updatePerfilService,
   updatePasswordService,
+  getPerfilCompletoService,
 } from "../services/usuario.service";
 
 export const getUsuarios = async (req: Request, res: Response) => {
@@ -76,5 +77,15 @@ export const getMetricas = async (_req: Request, res: Response) => {
   } catch (err: any) {
     console.error("❌ Error en getMetricas:", err.message);
     res.status(500).json({ error: err.message || "Error al obtener métricas" });
+  }
+};
+
+export const getPerfilCompleto = async (req: Request, res: Response) => {
+  try {
+    const result = await getPerfilCompletoService(req);
+    res.json(result);
+  } catch (err: any) {
+    console.error("❌ Error en getPerfilCompleto:", err.message);
+    res.status(500).json({ error: err.message || "Error al obtener perfil completo" });
   }
 };
