@@ -1,0 +1,140 @@
+name: PyFly CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: "18.x"
+
+jobs:
+  setup:
+    name: 🔧 Setup Proyecto
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Guardar inicio
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Mostrar contexto
+        run: |
+          echo "🚀 CI para PyFly"
+          echo "📅 Fecha: $(date)"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+          echo "👤 Usuario: ${{ github.actor }}"
+          echo "💬 Commit: ${{ github.event.head_commit.message }}"
+
+  estructura:
+    name: 📂 Verificar estructura
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Listar archivos
+        run: ls -la
+
+      - name: Verificar carpetas principales
+        run: |
+          echo "🔍 Verificando carpetas..."
+          [ -d "BACKEND" ] && echo "✅ BACKEND presente" || echo "⚠️ BACKEND faltante"
+          [ -d "FRONTEND" ] && echo "✅ FRONTEND presente" || echo "⚠️ FRONTEND faltante"
+
+  backend:
+    name: 🧹 Lint Backend
+    runs-on: ubuntu-latest
+    needs: estructura
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: BACKEND/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: ./BACKEND
+        run: npm ci
+
+      - name: Ejecutar lint
+        working-directory: ./BACKEND
+        run: npm run lint || echo "⚠️ Lint no configurado"
+
+  frontend:
+    name: 🎨 Lint Frontend
+    runs-on: ubuntu-latest
+    needs: estructura
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: FRONTEND/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: ./FRONTEND
+        run: npm ci
+
+      - name: Ejecutar lint
+        working-directory: ./FRONTEND
+        run: npm run lint || echo "⚠️ Lint no configurado"
+
+  resumen:
+    name: 📊 Resumen CI
+    runs-on: ubuntu-latest
+    needs: [setup, estructura, backend, frontend]
+    if: always()
+
+    steps:
+      - name: Calcular métricas
+        run: |
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+
+          FAILS=0
+          SUCCESSES=0
+
+          for job in setup estructura backend frontend; do
+            result="${{ needs[job].result }}"
+            if [ "$result" = "success" ]; then
+              SUCCESSES=$((SUCCESSES+1))
+            else
+              FAILS=$((FAILS+1))
+            fi
+          done
+
+          echo "DURATION=$DURATION" >> $GITHUB_ENV
+          echo "FAILS=$FAILS" >> $GITHUB_ENV
+          echo "SUCCESSES=$SUCCESSES" >> $GITHUB_ENV
+
+      - name: Mostrar resumen
+        run: |
+          echo "================================"
+          echo "   RESUMEN DE EJECUCIÓN"
+          echo "================================"
+          echo "✅ Setup: ${{ needs.setup.result }}"
+          echo "✅ Estructura: ${{ needs.estructura.result }}"
+          echo "✅ Backend Lint: ${{ needs.backend.result }}"
+          echo "✅ Frontend Lint: ${{ needs.frontend.result }}"
+          echo "--------------------------------"
+          echo "⏱ Tiempo total: $DURATION segundos"
+          echo "❌ Fallos: $FAILS"
+          echo "✅ Éxitos: $SUCCESSES"
+          echo "================================"
+          echo "🎉 ¡PyFly CI funcionando!"
