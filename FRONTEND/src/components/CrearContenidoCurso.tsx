@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCurso } from "@/context/CursoContexto";
+import { useAuth } from "@/hooks/useAuth";
+import { ROLES } from "@/config/roles.config";
 
 type BlockType = "text" | "image" | "video" | "audio" | "slides" | "playground";
 
@@ -19,9 +21,12 @@ interface ContentBlock {
 
 
 export default function ContentBuilder(): JSX.Element {
+  const { tieneRol } = useAuth();
   const { topicoSeleccionado } = useCurso();
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [pyodide, setPyodide] = useState<any>(null);
+
+  const esEstudiante = tieneRol(ROLES.ESTUDIANTE);
 
   useEffect(() => {
     const load = async () => {
@@ -41,6 +46,7 @@ export default function ContentBuilder(): JSX.Element {
   }
 
   try {
+    
     const resp = await fetch(
       `http://localhost:3000/api/contenidos/obtenerContenidoPorTopico/${topicoSeleccionado}`
     );
@@ -72,12 +78,15 @@ export default function ContentBuilder(): JSX.Element {
 
 // 2️⃣ useEffect solo llama a la función
 useEffect(() => {
+  console.log("Cargando contenido para el tópico:", topicoSeleccionado);
   cargarContenido();
 }, [topicoSeleccionado]);
   // ──────────────────────────────────────────────────────────────
   // Helpers
   // ──────────────────────────────────────────────────────────────
   const addBlock = (type: BlockType) => {
+    if (esEstudiante) return;
+
     const newBlock: ContentBlock = {
       id: crypto.randomUUID(),
       isNew: true,
@@ -88,22 +97,22 @@ useEffect(() => {
       files: null,
       mediaUrls: [],
     };
+
     setContentBlocks(prev => [...prev, newBlock]);
   };
 
   const markEditedIfNeeded = (block: ContentBlock, changes: Partial<ContentBlock>) =>
     !block.isNew ? { ...changes, isEdited: true } : changes;
 
-  const updateBlock = (id: string, changes: Partial<ContentBlock>) => {
-    setContentBlocks(prev =>
-      prev.map(b => (b.id === id ? { ...b, ...markEditedIfNeeded(b, changes) } : b))
-    );
-  };
+const updateBlock = (id: string, changes: Partial<ContentBlock>) => { 
+  
+  setContentBlocks(prev => prev.map(b => (b.id === id ? { ...b, ...markEditedIfNeeded(b, changes) } : b)) ); };
 
   const removeBlockLocal = (id: string) =>
     setContentBlocks(prev => prev.filter(b => b.id !== id));
 
   const removeBlock = async (id: string) => {
+    if (esEstudiante) return;
     const block = contentBlocks.find(b => b.id === id);
     if (!block) return;
 
@@ -125,6 +134,7 @@ useEffect(() => {
   };
 
 const removeFileFromBlock = (blockId: string, index: number) => {
+  if (esEstudiante) return;
   setContentBlocks(prev =>
     prev.map(block => {
       if (block.id === blockId) {
@@ -156,6 +166,10 @@ const removeFileFromBlock = (blockId: string, index: number) => {
   // Guardar contenido (nuevos + editados)
   // ──────────────────────────────────────────────────────────────
   const guardarContenido = async () => {
+    if (esEstudiante) {
+    alert("Solo lectura: no tienes permisos para guardar");
+    return;
+  }
   if (!topicoSeleccionado) return alert("Selecciona un tópico primero.");
 
   const nuevos = contentBlocks.filter(b => b.isNew);
@@ -286,57 +300,76 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
   }
 };
 
+const updateOutput = (id: string, output: string) => {
+  setContentBlocks(prev =>
+    prev.map(b =>
+      b.id === id ? { ...b, output } : b
+    )
+  );
+};
+
 
 
   // ──────────────────────────────────────────────────────────────
   // Render
   // ──────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen p-10 bg-slate-900 text-slate-100">
+    
+    <div className="min-h-screen p-6 bg-slate-900 text-slate-100">
       <h1 className="text-3xl font-semibold mb-6">Contenido</h1>
-
-      <button
-        onClick={guardarContenido}
-        className="mb-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold transition duration-150 cursor-pointer"
-      >
-        💾 Guardar contenido
-      </button>
+      <div>
+            {!esEstudiante && (
+        <button
+          onClick={guardarContenido}
+          className="mb-6 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold transition duration-150 cursor-pointer"
+        >
+          💾 Guardar contenido
+        </button>
+      )}
+      </div>
+      
 
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-3 border-b border-slate-700 pb-4 mb-6">
-        {["text","image","video","audio","slides","playground"].map(type => (
-          <button
-            key={type}
-            onClick={() => addBlock(type as BlockType)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg hover:bg-slate-700 transition duration-150 cursor-pointer"
-          >
-            {type === "text" ? "➕ Texto" :
-             type === "image" ? "🖼 Imagen" :
-             type === "video" ? "🎥 Video" :
-             type === "audio" ? "🎧 Audio" :
-             type === "slides" ? "📑 Slides" : "🐍 Playground"}
-          </button>
-        ))}
-      </div>
+     {!esEstudiante && ["text","image","video","audio","slides","playground"].map(type => (
+        <button
+          key={type}
+          onClick={() => addBlock(type as BlockType)}
+          className="px-4 ml-2 py-2 border border-slate-700 rounded-lg transition bg-slate-800 hover:bg-slate-700"
+        >
+          {type === "text" ? "➕ Texto" :
+          type === "image" ? "🖼 Imagen" :
+          type === "video" ? "🎥 Video" :
+          type === "audio" ? "🎧 Audio" :
+          type === "slides" ? "📑 Slides" : "🐍 Playground"}
+        </button>
+      ))}
 
       {/* Bloques */}
       <div className="space-y-6">
         {contentBlocks.map(block => {
           const fileCount = (block.files?.length || 0) + (block.mediaUrls?.length || 0);
           return (
-            <div key={block.id} className="bg-slate-800 border border-slate-700 rounded-lg p-5 shadow-lg">
+            <div key={block.id} className="bg-slate-800 border border-slate-700 rounded-lg p-5 shadow-lg mt-5">
               <div className="flex justify-between mb-3 items-center">
                 <div>
                   <span className="text-xl font-semibold mr-3">Bloque: {block.type}</span>
                   {block.isNew && <span className="text-xs bg-emerald-600 px-2 py-1 rounded ml-2">Nuevo</span>}
                   {!block.isNew && block.isEdited && <span className="text-xs bg-yellow-500 px-2 py-1 rounded ml-2">Editado</span>}
                 </div>
-                <button onClick={() => removeBlock(block.id)} className="bg-red-600 px-3 py-1 rounded cursor-pointer">✖ Eliminar</button>
-              </div>
+                    {!esEstudiante && (
+                      <button
+                        onClick={() => removeBlock(block.id)}
+                        className="bg-red-600 px-3 py-1 rounded cursor-pointer "
+                      >
+                        ✖ Eliminar
+                      </button>
+                    )}              
+                </div>
 
               <input
                 type="text"
                 value={block.title}
+                disabled={esEstudiante}
                 placeholder="Título"
                 className="w-full bg-slate-900 border border-slate-700 p-2 rounded mb-4"
                 onChange={e => updateBlock(block.id, { title: e.target.value })}
@@ -345,6 +378,7 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
               {block.type === "text" && (
                 <textarea
                   className="w-full bg-slate-900 border border-slate-700 rounded p-3 h-32"
+                  disabled={esEstudiante}
                   value={block.content}
                   placeholder="Texto..."
                   onChange={e => updateBlock(block.id, { content: e.target.value })}
@@ -353,7 +387,8 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
 
               {(block.type === "image" || block.type === "video" || block.type === "audio" || block.type === "slides") && (
                 <>
-                  <label className="inline-block mb-3 px-4 py-2 bg-slate-700 rounded cursor-pointer">
+                {!esEstudiante && (
+                  <label className="inline-block mb-3 px-4 py-2 bg-slate-700 rounded cursor-pointer text-sm hover:bg-slate-600 transition">
                     📁 {fileCount} archivo(s)
                     <input
                       type="file"
@@ -375,7 +410,7 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
                         e.target.value = "";
                       }}
                     />
-                  </label>
+                  </label>)}
 
                   {/* Preview mediaUrls */}
                   {block.mediaUrls?.length > 0 && (
@@ -386,7 +421,9 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
                           {block.type === "video" && <video controls className="h-40 rounded" src={url} />}
                           {block.type === "audio" && <audio controls src={url} />}
                           {block.type === "slides" && <a href={url} target="_blank" className="underline text-blue-300">{url.split("/").pop()}</a>}
+                          {!esEstudiante && (
                           <button onClick={() => removeFileFromBlock(block.id, idx)} className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 transform hover:scale-110">✕</button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -401,7 +438,9 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
                           {block.type === "video" && <video controls className="h-40 rounded" src={URL.createObjectURL(file)} />}
                           {block.type === "audio" && <audio controls src={URL.createObjectURL(file)} />}
                           {block.type === "slides" && <p className="text-slate-300">{file.name}</p>}
+                          {!esEstudiante && (
                           <button onClick={() => removeFileFromBlock(block.id, idx)} className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all duration-200 transform hover:scale-110">✕</button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -409,6 +448,7 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
 
                   <textarea
                     className="w-full bg-slate-900 border border-slate-700 rounded p-3 h-24"
+                    disabled={esEstudiante}
                     value={block.content}
                     placeholder="Descripción..."
                     onChange={e => updateBlock(block.id, { content: e.target.value })}
@@ -432,7 +472,7 @@ const runPython = async (code: string, setOutput: (msg: string) => void) => {
                   <button
                     onClick={() =>
                       runPython(block.content, msg =>
-                        updateBlock(block.id, { output: msg }) // ahora msg es un string
+                        updateOutput(block.id, msg) // ahora msg es un string
                       )
                     }
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-md font-bold"

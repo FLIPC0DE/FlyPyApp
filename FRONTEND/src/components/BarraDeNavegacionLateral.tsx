@@ -3,6 +3,8 @@ import { AutenticacionContexto } from "@/context/AutenticacionContexto";
 import { Plus, X, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCurso } from "../context/CursoContexto";
+import { useAuth } from "@/hooks/useAuth";
+import { ROLES } from "@/config/roles.config";
 
 interface Curso {
   id_curso: number;
@@ -20,15 +22,16 @@ interface Modulo {
 
 const Sidebar: React.FC = () => {
     
+  const { tieneRol } = useAuth();
+
   
-
-
+  
   const { user } = useContext(AutenticacionContexto)!;
   
   const { setModuloSeleccionado } = useCurso();
 
    // Verificar si el usuario es ESTUDIANTE (no puede crear cursos)
-  const esEstudiante = user?.rol_global === "ESTUDIANTE";
+  const esEstudiante = tieneRol(ROLES.ESTUDIANTE);
 
   const [showModalEdicion, setShowModalEdicion] = useState(false);
 
@@ -75,9 +78,17 @@ const Sidebar: React.FC = () => {
   // ---------- Fetchs ----------
   const obtenerCursos = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/cursos/listarCursos");
-      const data = await res.json();
-      setCursos(data);
+      if(esEstudiante){
+          const res = await fetch(`http://localhost:3000/api/cursos/obtenerCursosAlCualInscribi/${user?.userId}`);
+          const data = await res.json();
+          setCursos(data);
+      }
+      else{
+        const res = await fetch("http://localhost:3000/api/cursos/ObtenerCursosDocente/" + user?.userId);
+        const data = await res.json();
+        setCursos(data);
+      }
+
     } catch (error) {
       console.error("Error al obtener cursos:", error);
     }
@@ -520,7 +531,9 @@ const guardarCambiosElemento = async (
           {/* Nombre del módulo */}
           <h3 className="mt-1 font-semibold text-emerald-400">{modulo.nombre}</h3>
 
+          
           {/* Botón de 3 puntos para módulo */}
+          {!esEstudiante && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -531,10 +544,10 @@ const guardarCambiosElemento = async (
             className="absolute right-2 top-2 px-2 py-0 text-emerald-400 hover:text-emerald-200 text-3xl font-bold cursor-pointer"
           >
             ⋮
-          </button>
+          </button>)}
 
           {/* Menú del módulo */}
-          {menuModuloAbierto === modulo.id_modulo && (
+          {!esEstudiante && menuModuloAbierto === modulo.id_modulo && (
             <div className="absolute right-0 mt-2 w-50 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
               <button
                 onClick={(e) => {
@@ -588,8 +601,9 @@ const guardarCambiosElemento = async (
               </div>
 
               {/* Menú de 3 puntos */}
+              
               <div className="relative">
-                <button
+                {!esEstudiante && (<button
                   onClick={(e) => {
                     e.stopPropagation();
                     setMenuTopicoAbierto(menuTopicoAbierto === topico.id_topico ? null : topico.id_topico);
@@ -597,10 +611,11 @@ const guardarCambiosElemento = async (
                   className="px-2 py-0 text-emerald-400 hover:text-emerald-200 text-3xl font-bold cursor-pointer"
                 >
                   ⋮
-                </button>
+                </button>)}
+                
 
                 {/* Opciones del menú */}
-                {menuTopicoAbierto === topico.id_topico && (
+                {!esEstudiante && menuTopicoAbierto === topico.id_topico && (
                   <div className="absolute right-0 mt-1 w-40 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
                     <button
                         onClick={(e) => {
@@ -634,7 +649,7 @@ const guardarCambiosElemento = async (
 
 
         {/* Botón Añadir tópico */}
-        <button
+        {!esEstudiante && (<button
           onClick={() => {
             setModuloSeleccionadoParaTopico(modulo);
             setShowTopicoModal(true);
@@ -642,7 +657,8 @@ const guardarCambiosElemento = async (
           className="mt-2 text-sm bg-emerald-600 hover:bg-emerald-500 p-1 rounded text-white cursor-pointer"
         >
           + Añadir tópico
-        </button>
+        </button>)}
+        
       </div>
     ))}
   </>
@@ -651,7 +667,7 @@ const guardarCambiosElemento = async (
 )}
 
       <div className="flex gap-2 mt-3">
-        <button
+        {!esEstudiante && (<button
           onClick={() => {
             setCursoSeleccionado(curso);
             setShowModuloModal(true);
@@ -659,7 +675,8 @@ const guardarCambiosElemento = async (
           className="flex-1 bg-emerald-600 hover:bg-emerald-500 p-2 rounded-lg text-white"
         >
           + Añadir Modulo
-        </button>
+        </button>)}
+        
       </div>
 
             

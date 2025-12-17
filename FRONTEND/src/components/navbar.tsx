@@ -97,7 +97,7 @@ export const Navbar = () => {
                 <DropdownItem key="dashboard" href="/dashboard">
                   Dashboard
                 </DropdownItem>
-                <DropdownItem key="my-courses" href="/my-courses">
+                <DropdownItem key="prueba" href="/prueba">
                   Mis cursos
                 </DropdownItem>
                 <DropdownItem key="progress" href="/progress">

@@ -32,7 +32,7 @@ export const siteConfig = {
     },
     {
       label: "Mis Cursos",
-      href: "/my-courses",
+      href: "/prueba",
     },
     {
       label: "Progreso",

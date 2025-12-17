@@ -23,6 +23,7 @@ import EditarPerfilPage from "./pages/usario/editarPerfil";
 import CambiarContraseñaPage from "./pages/usario/cambiarContraseña";
 import RecuperarContraseñaPage from "./pages/auth/recuperarContraseña";
 import { obtenerRolesPermitidos } from "./config/roles.config";
+import Pruebita from "../src/pages/usario/prueba";
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
         <Route element={<LoginPage />} path="/login" />
         <Route element={<RegisterPage />} path="/register" />
         <Route element={<RecuperarContraseñaPage />} path="/recuperar" />
-
+        {/* <Route path="/prueba" element={<Pruebita />}/> */}
         {/* Rutas transitorias (no requieren protección) */}
         <Route element={<OAuthRedirectPage />} path="/oauth-redirect" />
         <Route element={<SeleccionarRolPage />} path="/seleccionar-rol" />
@@ -52,12 +53,12 @@ function App() {
           }
         />
         <Route
-          path="/my-courses"
+          path="/prueba"
           element={
             <RutaProtegida
-              rolesPermitidos={obtenerRolesPermitidos("/my-courses")}
+              rolesPermitidos={obtenerRolesPermitidos("/prueba")}
             >
-              <MyCoursesPage />
+              <Pruebita />
             </RutaProtegida>
           }
         />

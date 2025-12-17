@@ -202,7 +202,7 @@ export default function CoursesPage() {
                             color="success"
                             variant="flat"
                             className="w-full"
-                            onClick={() => navigate("/my-courses")}
+                            onClick={() => navigate("/prueba")}
                             endContent={<ArrowRight className="w-4 h-4" />}
                           >
                             Ya Inscrito - Ver Curso

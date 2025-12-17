@@ -23,7 +23,7 @@ interface Curso {
 }
 
 export default function MyCoursesPage() {
-  const { tieneRol } = useAuth();
+  const { user, tieneRol } = useAuth();
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
   const [mostrarConstructor, setMostrarConstructor] = useState(false);
@@ -34,7 +34,7 @@ export default function MyCoursesPage() {
     if (tieneRol(ROLES.DOCENTE_EJECUTOR)) {
       const cargarCursos = async () => {
         try {
-          const response = await fetch("http://localhost:3000/api/cursos/listarCursos");
+          const response = await fetch(`http://localhost:3000/api/cursos/obtenerCursosDocente/${user?.userId}`);
           if (response.ok) {
             const data = await response.json();
             setCursos(data);
@@ -85,7 +85,7 @@ export default function MyCoursesPage() {
         <div className="flex w-full">
           <Sidebar />
           
-          <div className="flex-1 ml-4">
+          { <div className="flex-1 ml-4">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 gap-4">
                 <Spinner size="lg" color="primary" />
@@ -166,7 +166,7 @@ export default function MyCoursesPage() {
                 )}
               </>
             )}
-          </div>
+          </div> }
         </div>
       </section>
     );
@@ -340,7 +340,7 @@ export default function MyCoursesPage() {
                         className="w-full"
                         onClick={() => {
                           // Navegar al contenido del curso (implementar cuando esté listo)
-                          navigate(`/curso/${curso.id_curso}`);
+                          navigate(`/prueba`);
                         }}
                         endContent={<ArrowRight className="w-4 h-4" />}
                       >

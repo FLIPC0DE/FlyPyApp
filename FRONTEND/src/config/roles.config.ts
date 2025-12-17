@@ -85,6 +85,14 @@ export const RUTAS_POR_ROL = {
     ROLES.ADMIN_AYUDANTE,
     ROLES.ADMINISTRADOR,
   ],
+  
+    "/prueba":[
+    ROLES.DOCENTE_EJECUTOR,
+    ROLES.ADMIN_AYUDANTE,
+    ROLES.ADMINISTRADOR,
+    ROLES.DOCENTE_EDITOR,
+    ROLES.ESTUDIANTE,
+    ]
 } as const;
 
 /**
